@@ -6,12 +6,45 @@
 
 namespace Slion\Http;
 
+use Slim\Http\Request as SlimRequest;
+use Slim\Http\Response as SlimResponse;
+use Slim\Container;
+
+
 /**
- * Description of Controller
+ * 默认控制器
  *
  * @author andares
+ *
+ * @property \Slion\Utils\Config $config
+ * @property \Slion\Utils\Dict $dict
+ * @property \Slion\Utils\Logger $logger
  */
 abstract class Controller {
+    /**
+     *
+     * @var SlimRequest
+     */
+    protected $request;
+
+    /**
+     *
+     * @var SlimResponse
+     */
+    protected $response;
+
+    /**
+     *
+     * @var Container
+     */
+    protected $container;
+
+    public function __construct(SlimRequest $request, SlimResponse $response, Container $container) {
+        $this->request      = $request;
+        $this->response     = $response;
+        $this->container    = $container;
+    }
+
     public function __call($name, $arguments) {
         $action = ucfirst($name);
         $method = "action$action";
@@ -22,39 +55,53 @@ abstract class Controller {
             }
 
             $request  = $this->getRequest($action);
-            $response = $this->$method($request, ...$arguments);
-            /* @var $response Response */
+            $response = $this->getResponse($action);
+
+            assert($this->log4request($request));
+            $this->$method($request, $response, ...$arguments);
             $response->confirm();
-
-            // 日志
-            \dlog(">> send response: $response", 'info');
+            assert($this->log4response($response));
         } catch (\Exception $exc) {
-            $response = new ErrorResponse();
-            $response->by($exc);
-
-            // 日志
-            \Tracy\Debugger::exceptionHandler($exc);
+            $response = ErrorResponse::handleException($exc, $this->response);
         }
 
-        return $response;
+        return $response->regress();
     }
 
-    private function getRequest($action) {
+    public function __get($name) {
+        return $this->container->get($name);
+    }
+
+    protected function log4request($request) {
+        $this->logger->info("receive request:$request", ['controller']);
+        return true;
+    }
+
+    protected function log4response($response) {
+        $this->logger->info("send response:$response", ['controller']);
+        return true;
+    }
+
+    /**
+     *
+     * @param string $action
+     * @return \Slion\Http\Request
+     */
+    protected function getRequest($action) {
         $class = get_called_class() . "\\{$action}Request";
-        if (class_exists($class)) {
-            $request = new $class($_REQUEST);
-            $request->confirm();
-
-            // 日志
-            \dlog(">> receive request: $request", 'info');
-        } else {
-            $request = $_REQUEST;
-
-            // 日志
-            \dlog(">> receive request: " . json_encode($request), 'info');
-        }
-
+        $request = new $class($this->request->getParams(), $this->request);
+        $request->confirm();
         return $request;
+    }
+
+    /**
+     *
+     * @param string $action
+     * @return \Slion\Http\Response
+     */
+    protected function getResponse($action) {
+        $class = get_called_class() . "\\{$action}Response";
+        return new $class([], $this->response);;
     }
 
 }

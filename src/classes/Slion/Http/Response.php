@@ -18,9 +18,13 @@ abstract class Response extends Meta {
         'Content-type'  => 'text/json;charset=utf-8',
     ];
 
-    public function __construct(array $data = null, SlimResponse $response) {
+    public function __construct(array $data, SlimResponse $response) {
         parent::__construct($data);
         $this->response = $response;
+    }
+
+    public function regress() {
+        return $this->response->withJson($this, $this->http_code);
     }
 
     public function setMessage($message) {

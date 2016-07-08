@@ -7,7 +7,7 @@ namespace Slion\Utils;
  *
  * @author andares
  */
-class Dict extends Conf {
+class Dict extends Config {
     public function __construct($base_dir, $scene, $default_scene = null) {
         parent::__construct($base_dir, $scene, $default_scene);
     }

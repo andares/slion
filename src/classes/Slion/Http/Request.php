@@ -2,55 +2,34 @@
 namespace Slion\Http;
 
 use Slion\Utils\Meta;
+use Slim\Http\Request as SlimRequest;
+
 
 /**
- * Http请求 dev_id  acc_id nonce token
+ * Http请求
  *
  * @author andares
+ *
  */
 abstract class Request extends Meta {
-    public $dev_id  = '';
-    public $acc_id  = '';
-    public $nonce   = '';
-    public $token   = '';
+    /**
+     *
+     * @var SlimRequest
+     */
+    private $request;
 
-    private static $header_mapping = [
-        'dev_id'    => 'DEV_ID',
-        'acc_id'    => 'ACC_ID',
-        'nonce'     => 'NONCE',
-        'token'     => 'TOKEN',
-    ];
+    public function __construct(array $data, SlimRequest $request) {
+        parent::__construct(array_merge($request->getParams(), $data));
 
-    private static $cookie_mapping = [
-        'dev_id'    => 'dev_id',
-        'acc_id'    => 'acc_id',
-        'nonce'     => 'nonce',
-        'token'     => 'token',
-    ];
-
-    public function __construct(array $data = null) {
-        parent::__construct($data);
-        $this->loadHeader($data);
+        // 取出对应的参数
+        $this->request = $request;
     }
 
-    protected function loadHeader(array $request) {
-        foreach (self::$header_mapping as $name => $key) {
-            if (isset($_SERVER["HTTP_$key"])) {
-                $this->$name = $_SERVER["HTTP_$key"];
-            } elseif (isset($_COOKIE[self::$cookie_mapping[$name]])) {
-                $this->$name = $_COOKIE[self::$cookie_mapping[$name]];
-            } elseif (isset($request[$name])) {
-                $this->$name = $request[$name];
-            }
-        }
+    public function __call($name, $arguments) {
+        return $this->request->$name(...$arguments);
     }
 
-    public function jsonSerialize() {
-        $arr = $this->toArray();
-        $arr['__HEADER__'] = [];
-        foreach (self::$header_mapping as $name => $key) {
-            $arr['__HEADER__'][$name] = $this->$name;
-        }
-        return $arr;
+    public function __debugInfo() {
+        return $this->toArray();
     }
 }

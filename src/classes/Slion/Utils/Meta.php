@@ -158,9 +158,6 @@ abstract class Meta implements \ArrayAccess, \IteratorAggregate, \Serializable, 
 
     public function __get($name) {
         $default = $this->getDefault($name);
-        if (!$default) {
-            return null;
-        }
         return isset($this->_data[$name]) ? $this->_data[$name] : $default;
     }
 

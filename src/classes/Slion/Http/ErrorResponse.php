@@ -5,6 +5,8 @@
  */
 
 namespace Slion\Http;
+use Tracy\Debugger;
+use Slim\Http\Response as SlimResponse;
 
 /**
  *
@@ -24,6 +26,21 @@ class ErrorResponse extends Response {
      * @var int
      */
     protected $http_code    = 200;
+
+    /**
+     *
+     * @param \Exception $exc
+     * @return self
+     */
+    public static function handleException(\Exception $exc, SlimResponse $response) {
+        if (Debugger::$productionMode) {
+            $response = new self([], $response);
+            $response->by($exc);
+            return $response->confirm();
+        }
+
+        \Tracy\Debugger::exceptionHandler($exc, true);
+    }
 
     public function __call($name, $arguments) {
         $this->exc->$name(...$arguments);

@@ -19,7 +19,7 @@ if (!function_exists('conf')) {
     function conf($path, $key = null) {
         global $app;
         $config = $app->getContainer()->config;
-        /* @var $config Slion\Utils\Conf */
+        /* @var $config Slion\Utils\Config */
         if ($key) {
             $config($path);
             return $config[$key];
@@ -62,26 +62,22 @@ if (!function_exists('dd')) {
     }
 }
 
-if (!function_exists('dl')) {
-    function dlog($message, $level = 'info') {
-        static $mapping = [
-            'debug' => Debugger::DEBUG,
-            'info' => Debugger::INFO,
-            'warning' => Debugger::WARNING,
-            'error' => Debugger::ERROR,
-            'exception' => Debugger::EXCEPTION,
-            'critical' => Debugger::CRITICAL,
-        ];
-        !isset($mapping[$level]) && $level = 'debug';
-        Debugger::log($message, $mapping[$level]);
+if (!function_exists('dlog')) {
+    function dlog($message, $level = 'debug') {
+        global $app;
+        $logger = $app->getContainer()->logger;
+        $logger($message, $level);
+    }
+}
+
+if (!function_exists('is_prod')) {
+    function is_prod() {
+        return Debugger::$productionMode;
     }
 }
 
 if (!function_exists('timer')) {
-    function timer($name = 0) {
-        static $names = [];
-        if (!isset($names[$name])) {
-            // 开始
-        }
+    function timer($name = null) {
+        return Debugger::timer($name);
     }
 }
