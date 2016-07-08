@@ -1,0 +1,23 @@
+{
+    "name": "andares/slion",
+    "description": "a php framework base slim from lion project",
+    "homepage": "http://www.swood.cc",
+    "type": "Framework",
+    "license": "LGPL3.0",
+    "authors": [
+        {
+            "name": "Andares Merigold",
+            "email": "andares@outlook.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "slim/slim": "^3.1",
+        "illuminate/database": "^5.2"
+    },
+    "require-dev": {
+        "tracy/tracy": "^2.4"
+    },
+    "autoload": {
+    }
+}
