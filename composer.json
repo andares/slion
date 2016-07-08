@@ -19,5 +19,6 @@
         "tracy/tracy": "^2.4"
     },
     "autoload": {
-    }
+    },
+    "minimum-stability": "dev"
 }
