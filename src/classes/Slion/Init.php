@@ -51,38 +51,47 @@ class Init {
         return $imported;
     }
 
-    public static function debuggerSetup(Collection $settings) {
-        $mode    = isset($settings['slion']['tracy']['mode']) ? $settings['slion']['tracy']['mode'] :
-            ($settings['displayErrorDetails'] ? Debugger::DEVELOPMENT : Debugger::PRODUCTION);
+    public static function debuggerSetup(array $tracy_settings, Utils\Logger $logger,
+        $display_error_details = false) {
 
-        // 自建目录
-        if (!file_exists($settings['slion']['tracy']['log_dir'])) {
-            mkdir($settings['slion']['tracy']['log_dir'], 0777, true);
+        // 设定模式
+        if (isset($tracy_settings['is_prod'])) {
+            $is_prod = $tracy_settings['is_prod'];
+        } else {
+            $is_prod = $display_error_details ? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
         }
-        Debugger::enable($mode, $settings['slion']['tracy']['log_dir']);
+
+        // 创建debugger
+        Debugger::enable($is_prod, $logger->directory, $logger->email);
+        Debugger::setLogger($logger);
 
         // 配置
-        Debugger::$maxDepth     = $settings['slion']['tracy']['max_depth'];
-        Debugger::$maxLength    = $settings['slion']['tracy']['max_length'];
+        Debugger::$maxDepth     = $tracy_settings['max_depth'];
+        Debugger::$maxLength    = $tracy_settings['max_length'];
     }
 
-    public static function injectUtils(Container $container) {
-        $container['config'] = function ($c) {
-            $config = $c->get('settings')['slion']['config'];
-            return new Utils\Config($config['base_dir'], $config['scene'], $config['scene_def']);
-        };
-        $container['dict'] = function ($c) {
-            $config = $c->get('settings')['slion']['dict'];
-            return new Utils\Dict($config['base_dir'], $config['lang']);
-        };
-        $container['logger'] = function ($c) {
-            $logger = new Utils\Logger();
-            return $logger;
-        };
+    public static function utilsSetup($setting) {
+        $utils = [];
+        foreach ($setting as $name => $config) {
+            $class = "\\Slion\\Utils\\" . ucfirst($name);
+            $utils[$name] = new $class(...$config);
+        }
+        \Slion::setUtils($utils);
+        return $utils;
     }
 
-    public static function iniSetup() {
-        ini_set('assert.exception', 1);
+    public static function injectUtils(Container $container, array $utils) {
+        foreach ($utils as $name => $object) {
+            $container[$name] = function($c) use ($object) {
+                return $object;
+            };
+        }
+    }
+
+    public static function iniSetup(array $settings) {
+        foreach ($settings as $name => $value) {
+            ini_set($name, $value);
+        }
 
         // 检查一下生产环境配置
         if (Debugger::$productionMode && ini_get('zend.assertions') != -1) {

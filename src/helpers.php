@@ -3,8 +3,7 @@ use Tracy\Debugger;
 
 if (!function_exists('trans')) {
     function trans($path, $key, $values = []) {
-        global $app;
-        $dict = $app->getContainer()->dict;
+        $dict = \Slion::dict();
         /* @var $dict Slion\Utils\Dict */
         $dict($path);
 
@@ -17,8 +16,7 @@ if (!function_exists('trans')) {
 
 if (!function_exists('conf')) {
     function conf($path, $key = null) {
-        global $app;
-        $config = $app->getContainer()->config;
+        $config = \Slion::config();
         /* @var $config Slion\Utils\Config */
         if ($key) {
             $config($path);
@@ -69,16 +67,9 @@ if (!function_exists('dd')) {
 }
 
 if (!function_exists('dlog')) {
-    function dlog($message, $level = 'debug') {
-        global $app;
-        if (PHP_VERSION_ID >= 70000) {
-            $this->log($message, self::$mapping[$level] ?? Debugger::DEBUG);
-        } else {
-            $this->log($message, isset(self::$mapping[$level]) ?
-                self::$mapping[$level] : Debugger::DEBUG);
-        }
-        $logger = $app->getContainer()->logger;
-        $logger($message, $level);
+    function dlog($message, $priority = 'debug') {
+        $logger = Debugger::getLogger();
+        $logger($message, $priority);
     }
 }
 
