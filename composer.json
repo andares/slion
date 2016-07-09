@@ -1,7 +1,7 @@
 {
     "name": "slion/slion",
     "description": "a php framework base slim from lion project",
-    "type": "Framework",
+    "keywords": ["framework"],
     "license": "LGPL3.0",
     "authors": [
         {
