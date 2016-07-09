@@ -26,12 +26,6 @@ if (!function_exists('conf')) {
     }
 }
 
-if (!function_exists('dapi')) {
-    function dapi($var, $flag = null) {
-
-    }
-}
-
 if (!function_exists('du')) {
     function du($var, $flag = null) {
         static $count = 0;

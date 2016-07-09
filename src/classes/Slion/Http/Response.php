@@ -9,51 +9,42 @@ use Slim\Http\Response as SlimResponse;
  *
  * @author andares
  */
-abstract class Response extends Meta {
-    protected $response;
+abstract class Response extends Meta implements DependenciesTaker {
+    /**
+     *
+     * @var SlimResponse
+     */
+    protected $_response;
 
-    protected $message      = '';
-    protected $http_code    = 200;
-    protected $http_header  = [
-        'Content-type'  => 'text/json;charset=utf-8',
-    ];
+    protected $_http_code    = 200;
 
     public function __construct(array $data, SlimResponse $response) {
         parent::__construct($data);
-        $this->response = $response;
+        $this->_response    = $response;
+    }
+
+    public function __call($name, $arguments) {
+        return $this->request->$name(...$arguments);
     }
 
     public function regress() {
-        return $this->response->withJson($this, $this->http_code);
-    }
-
-    public function setMessage($message) {
-        $this->message = $message;
+        return $this->_response->withJson($this, $this->_http_code);
     }
 
     public function setHttpCode($code = 200) {
-        $this->http_code = $code;
-    }
-
-    public function setHeader(array $header = [], $reset = false) {
-        $reset && $this->http_header = [];
-
-        foreach ($header as $name => $value) {
-            $this->http_header[$name] = $value;
-        }
-    }
-
-    public function applyHeader() {
-        foreach ($this->http_header as $name => $value) {
-            header("$name:$value");
-        }
+        $this->_http_code = $code;
     }
 
     public function jsonSerialize() {
+        return $this->makeProtocol();
+    }
+
+    protected function makeProtocol() {
         return [
-            'data'  => $this->toArray(),
-            'error' => 0,
-            'msg'   => $this->message,
+            'result'    => $this->toArray(),
+            'error'     => null,
         ];
     }
+
+    public function takeDependencies(\Slim\Container $container) {}
 }

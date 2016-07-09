@@ -33,8 +33,6 @@ class Config implements \ArrayAccess {
         }
 
         if (!isset($this->data[$path])) {
-            $this->data[$path] = [];
-
             $this->default_scene && $this->load($this->default_scene, $path);
             $this->load($this->scene, $path);
         }
@@ -45,7 +43,14 @@ class Config implements \ArrayAccess {
     private function load($scene, $path) {
         $file = "$this->base_dir/$scene/$path.php";
         if (file_exists($file)) {
-            $this->data[$path] = array_merge($this->data[$path], include $file);
+            if (isset($this->data[$path])) {
+                $this->data[$path] = include $file;
+            } else {
+                $loaded = include $file;
+                foreach ($loaded as $key => $value) {
+                    $this->data[$path][$key] = $value;
+                }
+            }
         }
     }
 

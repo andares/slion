@@ -9,18 +9,26 @@ use Slim\Http\Response as SlimResponse;
  */
 class ErrorResponse extends Response {
     /**
+     * 错误词典名
+     * @var string
+     */
+    protected static $_message_dict = 'errors';
+
+    /**
      *
      * @var \Exception
      */
-    private $exc;
+    private $_exc;
 
-    private $error = 0;
+    protected $_error_code = 0;
 
     /**
      * @todo 暂时还是先200
      * @var int
      */
-    protected $http_code    = 200;
+    protected $_http_code    = 200;
+
+    protected $_message = '';
 
     /**
      *
@@ -29,7 +37,7 @@ class ErrorResponse extends Response {
      */
     public static function handleException(\Exception $exc, SlimResponse $response) {
         if (Debugger::$productionMode) {
-            $response = new self([], $response);
+            $response = new static([], $response);
             $response->by($exc);
             return $response->confirm();
         }
@@ -38,26 +46,33 @@ class ErrorResponse extends Response {
     }
 
     public function __call($name, $arguments) {
-        $this->exc->$name(...$arguments);
+        $this->_exc->$name(...$arguments);
     }
 
-    public function setCode($code) {
-        $this->error = $code;
+    public function setErrorCode($code) {
+        $this->_error_code = $code;
+    }
+
+    public function setMessage($message) {
+        $this->_message = $message;
     }
 
     public function by(\Exception $exc) {
-        $this->exc = $exc;
+        $this->_exc = $exc;
 
-        $this->error    = $exc->getCode();
-        $message        = \trans('error_response', $this->error);
-        $this->message  = $message == $this->error ? $exc->getMessage() : $message;
+        $this->_error_code    = $exc->getCode();
+        $message        = \trans(static::$_message_dict, $this->_error_code);
+        $this->_message  = $message == $this->_error_code ? $exc->getMessage() : $message;
     }
 
-    public function jsonSerialize() {
+    protected function makeProtocol() {
         return [
-            'data'  => $this->toArray(),
-            'error' => $this->error,
-            'msg'   => $this->message,
+            'result'    => null,
+            'error'     => [
+                'message'   => $this->_message,
+                'code'      => $this->_error_code,
+                'data'      => $this->toArray(),
+            ],
         ];
     }
 

@@ -57,7 +57,7 @@ abstract class Controller {
             $response->confirm();
             assert($this->log4response($response));
         } catch (\Exception $exc) {
-            $response = ErrorResponse::handleException($exc, $this->response);
+            $response = $this->handleException($exc, $this->response);
         }
 
         return $response->regress();
@@ -65,6 +65,10 @@ abstract class Controller {
 
     public function __get($name) {
         return $this->container->get($name);
+    }
+
+    protected function handleException(\Exception $exc, SlimResponse $response) {
+        return ErrorResponse::handleException($exc, $response);
     }
 
     protected function log4request($request) {
@@ -80,11 +84,13 @@ abstract class Controller {
     /**
      *
      * @param string $action
-     * @return \Slion\Http\Request
+     * @return Request
      */
     protected function getRequest($action) {
         $class = get_called_class() . "\\{$action}Request";
         $request = new $class($this->request->getParams(), $this->request);
+        /* @var $request Request */
+        $request->takeDependencies($this->container);
         $request->confirm();
         return $request;
     }
@@ -92,11 +98,14 @@ abstract class Controller {
     /**
      *
      * @param string $action
-     * @return \Slion\Http\Response
+     * @return Response
      */
     protected function getResponse($action) {
-        $class = get_called_class() . "\\{$action}Response";
-        return new $class([], $this->response);;
+        $class      = get_called_class() . "\\{$action}Response";
+        $response   = new $class([], $this->response);
+        /* @var $response Response */
+        $response->takeDependencies($this->container);
+        return $response;
     }
 
 }

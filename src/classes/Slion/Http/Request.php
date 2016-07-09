@@ -11,25 +11,25 @@ use Slim\Http\Request as SlimRequest;
  * @author andares
  *
  */
-abstract class Request extends Meta {
+abstract class Request extends Meta implements DependenciesTaker {
     /**
      *
      * @var SlimRequest
      */
-    private $request;
+    protected $_request;
 
     public function __construct(array $data, SlimRequest $request) {
         parent::__construct(array_merge($request->getParams(), $data));
-
-        // 取出对应的参数
-        $this->request = $request;
+        $this->_request     = $request;
     }
 
     public function __call($name, $arguments) {
-        return $this->request->$name(...$arguments);
+        return $this->_request->$name(...$arguments);
     }
 
     public function __debugInfo() {
         return $this->toArray();
     }
+
+    public function takeDependencies(\Slim\Container $container) {}
 }
