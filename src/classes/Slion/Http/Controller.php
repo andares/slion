@@ -32,12 +32,19 @@ abstract class Controller {
      *
      * @var Container
      */
-    protected $container;
+    protected $container = null;
 
-    public function __construct(SlimRequest $request, SlimResponse $response, Container $container) {
+    public function __construct(SlimRequest $request, SlimResponse $response) {
+        global $app;
+        /* @var $app \Slim\App */
+
         $this->request      = $request;
         $this->response     = $response;
-        $this->container    = $container;
+        $app && $this->container = $app->getContainer();
+    }
+
+    public function setContainer(Container $container) {
+        $this->container = $container;
     }
 
     public function __call($name, $arguments) {

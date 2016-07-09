@@ -46,10 +46,8 @@ class Router {
     }
 
     public function __invoke($controller_name, $action, array $ext = []) {
-        global $app;
-        /* @var $app \Slim\App */
         $class      = $this->getControllerClass($controller_name);
-        $controller = new $class($this->request, $this->response, $app->getContainer());
+        $controller = new $class($this->request, $this->response);
         return $controller->$action(...$ext);
     }
 
