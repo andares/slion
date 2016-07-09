@@ -1,20 +1,16 @@
 <?php
-
-/*
- * license less
- */
-
 namespace Slion\Utils;
 
 use Psr\Log\LoggerInterface;
 use Tracy\Debugger;
+use Tracy\Logger as TracyLogger;
 
 /**
  * Description of Logger
  *
  * @author andares
  */
-class Logger implements LoggerInterface {
+class Logger extends TracyLogger implements LoggerInterface {
     private static $mapping = [
         'debug'     => Debugger::DEBUG,
         'info'      => Debugger::INFO,
@@ -29,12 +25,6 @@ class Logger implements LoggerInterface {
     ];
 
     public function __invoke($message, $level = 'debug') {
-        if (PHP_VERSION_ID >= 70000) {
-            Debugger::log($message, self::$mapping[$level] ?? Debugger::DEBUG);
-        } else {
-            Debugger::log($message, isset(self::$mapping[$level]) ?
-                self::$mapping[$level] : Debugger::DEBUG);
-        }
     }
 
     private function buildContent($message, array $context = []) {
@@ -46,7 +36,7 @@ class Logger implements LoggerInterface {
     }
 
     public function exception($message, array $context = []) {
-        Debugger::log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
+        $this->log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
     }
 
    /**
@@ -57,7 +47,7 @@ class Logger implements LoggerInterface {
      * @return null
      */
     public function emergency($message, array $context = []) {
-        Debugger::log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
+        $this->log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
     }
 
     /**
@@ -71,7 +61,7 @@ class Logger implements LoggerInterface {
      * @return null
      */
     public function alert($message, array $context = []) {
-        Debugger::log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
+        $this->log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
     }
 
     /**
@@ -84,7 +74,7 @@ class Logger implements LoggerInterface {
      * @return null
      */
     public function critical($message, array $context = []) {
-        Debugger::log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
+        $this->log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
     }
 
     /**
@@ -96,7 +86,7 @@ class Logger implements LoggerInterface {
      * @return null
      */
     public function error($message, array $context = []) {
-        Debugger::log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
+        $this->log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
     }
 
     /**
@@ -110,7 +100,7 @@ class Logger implements LoggerInterface {
      * @return null
      */
     public function warning($message, array $context = []) {
-        Debugger::log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
+        $this->log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
     }
 
     /**
@@ -121,7 +111,7 @@ class Logger implements LoggerInterface {
      * @return null
      */
     public function notice($message, array $context = []) {
-        Debugger::log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
+        $this->log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
     }
 
     /**
@@ -134,7 +124,7 @@ class Logger implements LoggerInterface {
      * @return null
      */
     public function info($message, array $context = []) {
-        Debugger::log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
+        $this->log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
     }
 
     /**
@@ -145,7 +135,7 @@ class Logger implements LoggerInterface {
      * @return null
      */
     public function debug($message, array $context = []) {
-        Debugger::log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
+        $this->log($this->buildContent($message, $context), self::$mapping[__FUNCTION__]);
     }
 
     /**
@@ -157,6 +147,6 @@ class Logger implements LoggerInterface {
      * @return null
      */
     public function log($level, $message, array $context = []) {
-        $this($this->buildContent($message, $context), $level);
+        parent::log($this->buildContent($message, $context), $level);
     }
 }

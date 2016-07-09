@@ -1,9 +1,4 @@
 <?php
-
-/*
- * license less
- */
-
 namespace Slion;
 
 /**
@@ -14,6 +9,8 @@ namespace Slion;
 class Test {
     public static function init() {
         global $app;
-        du($app);
+        if ($app instanceof \Slim\App) {
+            du('inited', 'test');
+        }
     }
 }

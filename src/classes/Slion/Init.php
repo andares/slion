@@ -1,9 +1,4 @@
 <?php
-
-/*
- * license less
- */
-
 namespace Slion;
 
 use Slim\Container;

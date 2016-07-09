@@ -1,9 +1,4 @@
 <?php
-
-/*
- * license less
- */
-
 namespace Slion\Http;
 use Tracy\Debugger;
 use Slim\Http\Response as SlimResponse;

@@ -28,13 +28,19 @@ if (!function_exists('conf')) {
     }
 }
 
+if (!function_exists('dapi')) {
+    function dapi($var, $flag = null) {
+
+    }
+}
+
 if (!function_exists('du')) {
     function du($var, $flag = null) {
         static $count = 0;
         $count++;
 
         if ($flag) {
-            Debugger::dump("=== Dump $title ===");
+            Debugger::dump("=== Dump $flag ===");
         } else {
             Debugger::dump("=== Dump #$count ===");
         }
@@ -65,6 +71,12 @@ if (!function_exists('dd')) {
 if (!function_exists('dlog')) {
     function dlog($message, $level = 'debug') {
         global $app;
+        if (PHP_VERSION_ID >= 70000) {
+            $this->log($message, self::$mapping[$level] ?? Debugger::DEBUG);
+        } else {
+            $this->log($message, isset(self::$mapping[$level]) ?
+                self::$mapping[$level] : Debugger::DEBUG);
+        }
         $logger = $app->getContainer()->logger;
         $logger($message, $level);
     }

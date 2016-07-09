@@ -1,9 +1,4 @@
 <?php
-
-/*
- * license less
- */
-
 namespace Slion\Http;
 
 use Slim\Http\Request as SlimRequest;
