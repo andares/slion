@@ -62,17 +62,21 @@ class Dispatcher {
     }
 
     public function route($controller_name, $action, array $ext = []) {
-        $class      = $this->getControllerClass($controller_name);
-        $controller = new $class($this);
-        return $this->callAction($controller, $action, $ext);
+        $response = $this->call($controller_name, $action, $ext);
+        return $response->regress($this->response);
     }
 
     protected function getControllerClass($name) {
         return "$this->space\\Controllers\\" . ucfirst($name);
     }
 
-    protected function callAction(Controller $controller, $action, array $ext) {
+    public function call($controller_name, $action, array $ext = []) {
         try {
+            // 生成controller
+            $class      = $this->getControllerClass($controller_name);
+            $controller = new $class($this);
+
+            // 生成request和response
             list($request, $response) = $this->makeAccessMessage($controller, $action);
             /* @var $request Request */
             /* @var $response Response */
@@ -84,7 +88,7 @@ class Dispatcher {
             $response = $this->handleException($exc, $this->response);
         }
 
-        return $response->regress($this->response);
+        return $response;
     }
 
     protected function handleException(\Exception $exc, RawResponse $response) {

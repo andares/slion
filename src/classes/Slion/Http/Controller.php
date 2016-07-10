@@ -41,8 +41,15 @@ abstract class Controller {
         $this->_log4response($arguments[1]);
     }
 
+    public function call($controller_name, $action, array $ext = []) {
+        if (!$this->dispatcher) {
+            return null;
+        }
+        return $this->dispatcher->call($controller_name, $action, $ext);
+    }
+
     public function __get($name) {
-        return $this->dispatcher->get($name);
+        return $this->dispatcher ? $this->dispatcher->get($name) : null;
     }
 
     protected function _log4request($request) {
