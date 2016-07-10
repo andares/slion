@@ -1,5 +1,6 @@
 <?php
 use Tracy\Debugger;
+use Tracy\Dumper;
 
 if (!function_exists('tr')) {
     function tr($path, $key, $values = []) {
@@ -23,6 +24,20 @@ if (!function_exists('cf')) {
             return $config[$key];
         }
         return $config($path);
+    }
+}
+
+if (!function_exists('dt')) {
+    function dt($var, $flag = null) {
+        static $count = 0;
+        $count++;
+
+        if ($flag) {
+            echo Dumper::toText("=== Dump $flag ===");
+        } else {
+            echo Dumper::toText("=== Dump #$count ===");
+        }
+        echo Dumper::toText($var);
     }
 }
 

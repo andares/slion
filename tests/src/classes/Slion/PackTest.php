@@ -34,8 +34,6 @@ class PackTest extends \PHPUnit_Framework_TestCase {
      */
     public function testEncode() {
         $a = Pack::encode('json', ['a' => 1,2,3]);
-        du(Pack::decode('json', $a));
-        du(Pack::encode('msgpack', [1,2,3]));
     }
 
     /**

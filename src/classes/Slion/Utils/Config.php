@@ -79,14 +79,7 @@ class Config implements \ArrayAccess {
 
     public function offsetGet($offset) {
         $current = $this->current();
-        if (!isset($current[$offset])) {
-            if ($this->default_conf) {
-                return $this->default_conf[$offset];
-            } else {
-                return null;
-            }
-        }
-        return $current[$offset];
+        return $current[$offset] ?? null;
     }
 
     /**

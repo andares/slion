@@ -33,12 +33,17 @@ class Dispatcher {
      */
     protected $response;
 
-    public function __construct(Container $container, $space,
+    public function __construct($space, Container $container,
         RawRequest $request, RawResponse $response) {
         $this->container    = $container;
         $this->space        = $space;
         $this->request      = $request;
         $this->response     = $response;
+
+        // 注册自己
+        $container['dispatcher'] = function($c) {
+            return $this;
+        };
     }
 
     public function get($name) {
@@ -76,12 +81,14 @@ class Dispatcher {
             $class      = $this->getControllerClass($controller_name);
             $controller = new $class($this);
 
-            // 生成request和response
-            list($request, $response) = $this->makeAccessMessage($controller, $action);
-            /* @var $request Request */
+            // 生成access对象
+            list($response, $request) = $this->makeAccessMessage($controller, $action);
             /* @var $response Response */
 
-            $controller->$action($response, $request, ...$ext);
+            // TODO 这里的处理有潜在可能的问题需要注意，如果$ext在其他地方被使用会导致数级值变化
+            $request && array_unshift($ext, $request);
+
+            $controller->$action($response, ...$ext);
             $response->confirm();
             $response->applyHeaders($this->response);
         } catch (\Exception $exc) {
@@ -98,22 +105,24 @@ class Dispatcher {
     protected function makeAccessMessage(Controller $controller, $action) {
         $prefix = get_class($controller) . '\\' . ucfirst($action);
 
-        // 创建request
-        $request_class  = "{$prefix}Request";
-        if (class_exists($request_class)) {
-            $request = new $request_class($this->request->getParams());
-            /* @var $request Request */
-            $request->takeDependencies($this->container);
-            $request->confirm();
-        }
-
         // 创建response
         $response_class = "{$prefix}Response";
         $response   = new $response_class();
         /* @var $response Response */
         $response->takeDependencies($this->container);
 
-        return [$request, $response];
+        // 创建request
+        $request_class  = "{$prefix}Request";
+        if (@class_exists($request_class)) {
+            $request = new $request_class($this->request->getParams());
+            /* @var $request Request */
+            $request->takeDependencies($this->container);
+            $request->confirm();
+        } else {
+            $request = null;
+        }
+
+        return [$response, $request];
     }
 
 }
