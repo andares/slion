@@ -77,7 +77,7 @@ class Dispatcher {
             /* @var $request Request */
             /* @var $response Response */
 
-            $controller->$action($request, $response, ...$ext);
+            $controller->$action($response, $request, ...$ext);
             $response->confirm();
             $response->applyHeaders($this->response);
         } catch (\Exception $exc) {
@@ -96,10 +96,12 @@ class Dispatcher {
 
         // 创建request
         $request_class  = "{$prefix}Request";
-        $request = new $request_class($this->request->getParams());
-        /* @var $request Request */
-        $request->takeDependencies($this->container);
-        $request->confirm();
+        if (class_exists($request_class)) {
+            $request = new $request_class($this->request->getParams());
+            /* @var $request Request */
+            $request->takeDependencies($this->container);
+            $request->confirm();
+        }
 
         // 创建response
         $response_class = "{$prefix}Response";
