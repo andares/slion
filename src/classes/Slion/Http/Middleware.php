@@ -1,8 +1,8 @@
 <?php
 namespace Slion\Http;
 
-use Slim\Http\Request as SlimRequest;
-use Slim\Http\Response as SlimResponse;
+use Slim\Http\Request as RawRequest;
+use Slim\Http\Response as RawResponse;
 
 /**
  * Description of Middleware
@@ -10,5 +10,5 @@ use Slim\Http\Response as SlimResponse;
  * @author andares
  */
 interface Middleware {
-    public function __invoke(SlimRequest $request, SlimResponse $response, callable $next);
+    public function __invoke(RawRequest $request, RawResponse $response, callable $next);
 }

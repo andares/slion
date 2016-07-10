@@ -1,8 +1,8 @@
 <?php
 use Tracy\Debugger;
 
-if (!function_exists('trans')) {
-    function trans($path, $key, $values = []) {
+if (!function_exists('tr')) {
+    function tr($path, $key, $values = []) {
         $dict = \Slion::dict();
         /* @var $dict Slion\Utils\Dict */
         $dict($path);
@@ -14,8 +14,8 @@ if (!function_exists('trans')) {
     }
 }
 
-if (!function_exists('conf')) {
-    function conf($path, $key = null) {
+if (!function_exists('cf')) {
+    function cf($path, $key = null) {
         $config = \Slion::config();
         /* @var $config Slion\Utils\Config */
         if ($key) {
@@ -53,8 +53,8 @@ if (!function_exists('dbar')) {
     }
 }
 
-if (!function_exists('dd')) {
-    function dd($var, $flag = null) {
+if (!function_exists('dh')) {
+    function dh($var, $flag = null) {
         du($var, $flag);
         die();
     }

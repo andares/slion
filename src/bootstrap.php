@@ -15,6 +15,9 @@ $slion_bootstrap = function(array $settings) {
     Slion\Init::registerAutoload($settings['libraries']);
     Slion\Init::importLibrary(__DIR__ . DIRECTORY_SEPARATOR . 'classes');
 
+    // 存一下settings
+    \Slion::setSettings($settings);
+
     // 初始化配置、语言包、日志等
     $utils = Slion\Init::utilsSetup($settings['utils']);
 

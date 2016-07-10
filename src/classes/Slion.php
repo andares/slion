@@ -6,7 +6,16 @@
  * @author andares
  */
 class Slion {
+    private static $settings = [];
     private static $utils = [];
+
+    final public static function setSettings(array $settings) {
+        self::$settings = $settings;
+    }
+
+    final public static function getSettings($name) {
+        return self::$settings[$name];
+    }
 
     final public static function __callStatic($name, array $arguments) {
         if ($arguments) {

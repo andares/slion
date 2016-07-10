@@ -11,6 +11,9 @@ $GLOBALS['settings']['slion_settings'] = [
     'php_ini'   => [
         'assert.exception'  => 1,
     ],
+    'helpers'   => [    // 自定义helper方法库
+    ],
+    'pack'      => [], // pack 配置
     'tracy'     => [
         'is_prod'       => false, // 设置 null 时跟 displayErrorDetails 配置走
         'max_depth'     => 6,

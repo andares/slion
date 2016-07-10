@@ -1,11 +1,17 @@
 <?php
-namespace Slion\Utils;
+namespace Slion;
 
 /**
  *
  * @author andares
  */
 abstract class Meta implements \ArrayAccess, \IteratorAggregate, \Serializable, \JsonSerializable {
+    /**
+     * 序列化打包格式
+     * @var string
+     */
+    protected static $_serialize_format = 'msgpack';
+
     /**
      * 数组化包版本号
      * @var int
@@ -128,11 +134,11 @@ abstract class Meta implements \ArrayAccess, \IteratorAggregate, \Serializable, 
     }
 
     protected static function pack(array $value) {
-        return \msgpack_pack($value);
+        return Pack::encode(static::$_serialize_format, $value);
     }
 
     protected static function unpack($data) {
-        return \msgpack_unpack($data);
+        return Pack::decode(static::$_serialize_format, $value);
     }
 
     /**

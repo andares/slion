@@ -1,8 +1,8 @@
 <?php
 namespace Slion\Http;
 
-use Slion\Utils\Meta;
-use Slim\Http\Response as SlimResponse;
+use Slion\Meta;
+use Slim\Http\Response as RawResponse;
 
 /**
  * Http响应
@@ -10,25 +10,35 @@ use Slim\Http\Response as SlimResponse;
  * @author andares
  */
 abstract class Response extends Meta implements DependenciesTaker {
-    /**
-     *
-     * @var SlimResponse
-     */
-    protected $_response;
-
     protected $_http_code    = 200;
 
-    public function __construct(array $data, SlimResponse $response) {
-        parent::__construct($data);
-        $this->_response    = $response;
+    protected $_http_headers = [
+    ];
+
+    public function setHeaders(array $headers = [], $reset = false) {
+        $reset && $this->_http_headers = [];
+
+        foreach ($headers as $name => $value) {
+            $this->_http_headers[$name] = $value;
+        }
     }
 
-    public function __call($name, $arguments) {
-        return $this->request->$name(...$arguments);
+    public function applyHeaders(RawResponse $response) {
+        // http 头
+        if ($this->_http_headers) {
+            foreach ($this->_http_headers as $name => $value) {
+                $response = $response->withHeader($name, $value);
+            }
+        }
     }
 
-    public function regress() {
-        return $this->_response->withJson($this, $this->_http_code);
+    /**
+     *
+     * @param RawResponse $response
+     * @return RawResponse
+     */
+    public function regress(RawResponse $response) {
+        return $response->withJson($this, $this->_http_code);
     }
 
     public function setHttpCode($code = 200) {

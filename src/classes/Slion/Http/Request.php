@@ -1,8 +1,8 @@
 <?php
 namespace Slion\Http;
 
-use Slion\Utils\Meta;
-use Slim\Http\Request as SlimRequest;
+use Slion\Meta;
+use Slion\Pack;
 
 
 /**
@@ -12,19 +12,17 @@ use Slim\Http\Request as SlimRequest;
  *
  */
 abstract class Request extends Meta implements DependenciesTaker {
-    /**
-     *
-     * @var SlimRequest
-     */
-    protected $_request;
+    protected static $_pack_format = 'json';
+    protected static $_packed = [];
 
-    public function __construct(array $data, SlimRequest $request) {
-        parent::__construct(array_merge($request->getParams(), $data));
-        $this->_request     = $request;
-    }
+    public function confirm() {
+        // 解包打包的参数
+        foreach (static::$_packed as $name) {
+            is_string($this->$name) &&
+                $this->$name = Pack::decode(static::$_pack_format, $this->$name);
+        }
 
-    public function __call($name, $arguments) {
-        return $this->_request->$name(...$arguments);
+        parent::confirm();
     }
 
     public function __debugInfo() {

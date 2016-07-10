@@ -18,7 +18,6 @@ class Init {
             spl_autoload_register(function ($classname) {
                 $classname  = \str_replace("\\", DIRECTORY_SEPARATOR, $classname);
 
-                // TODO 这里加入try，只为处理phpunit中愚蠢的、莫名奇妙地对composer autoload类的载入
                 try {
                     include "$classname.php";
                 } catch (\Exception $exc) {

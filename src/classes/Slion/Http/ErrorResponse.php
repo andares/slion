@@ -1,7 +1,7 @@
 <?php
 namespace Slion\Http;
 use Tracy\Debugger;
-use Slim\Http\Response as SlimResponse;
+use Slim\Http\Response as RawResponse;
 
 /**
  *
@@ -35,7 +35,7 @@ class ErrorResponse extends Response {
      * @param \Exception $exc
      * @return self
      */
-    public static function handleException(\Exception $exc, SlimResponse $response) {
+    public static function handleException(\Exception $exc, RawResponse $response) {
         if (Debugger::$productionMode) {
             $response = new static([], $response);
             $response->by($exc);
@@ -61,7 +61,7 @@ class ErrorResponse extends Response {
         $this->_exc = $exc;
 
         $this->_error_code    = $exc->getCode();
-        $message        = \trans(static::$_message_dict, $this->_error_code);
+        $message        = \tr(static::$_message_dict, $this->_error_code);
         $this->_message  = $message == $this->_error_code ? $exc->getMessage() : $message;
     }
 
