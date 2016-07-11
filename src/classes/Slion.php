@@ -30,10 +30,6 @@ class Slion {
     }
 
     final public static function getUtils($name = null) {
-        if (PHP_VERSION_ID >= 70000) {
-            return $name ? (self::$utils[$name] ?? null) : self::$utils;
-        } else {
-            return $name ? (isset(self::$utils[$name]) ? self::$utils[$name] : null) : self::$utils;
-        }
+        return $name ? (self::$utils[$name] ?? null) : self::$utils;
     }
 }

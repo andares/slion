@@ -60,12 +60,7 @@ class Config implements \ArrayAccess {
      * @return array
      */
     public function current() {
-        if (PHP_VERSION_ID >= 70000) {
-            return $this->data[$this->current_path] ?? [];
-        } else {
-            return isset($this->data[$this->current_path]) ?
-                $this->data[$this->current_path] : [];
-        }
+        return $this->data[$this->current_path] ?? [];
     }
 
     /**

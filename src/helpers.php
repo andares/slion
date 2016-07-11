@@ -60,11 +60,7 @@ if (!function_exists('dbar')) {
         static $count = 0;
         $count++;
 
-        if (PHP_VERSION_ID >= 70000) {
-            Debugger::barDump($var, $flag ?? "Dump #$count");
-        } else {
-            Debugger::barDump($var, $flag ? $flag : "Dump #$count");
-        }
+        Debugger::barDump($var, $flag ?? "Dump #$count");
     }
 }
 
