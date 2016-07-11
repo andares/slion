@@ -68,8 +68,8 @@ if (!function_exists('dbar')) {
     }
 }
 
-if (!function_exists('dh')) {
-    function dh($var, $flag = null) {
+if (!function_exists('ds')) {
+    function ds($var, $flag = null) {
         du($var, $flag);
         die();
     }
