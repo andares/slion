@@ -53,8 +53,8 @@ abstract class Controller {
     }
 
     protected function _log4request($request) {
-        if ($request) {
-            $this->logger && $this->logger->info("receive request:$request", ['controller']);
+        if ($this->logger) {
+            $this->logger->info("receive request:" . ($request ?? '[]'), ['controller']);
         }
     }
 
