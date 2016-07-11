@@ -39,7 +39,7 @@ class Logger extends TracyLogger {
 		return implode(' ', [
 			@date('[Y-m-d H:i:s]'),
 			preg_replace('#\s*\r?\n\s*#', ' ', $this->formatMessage($message)),
-			' @  ' . Helpers::getSource(),
+			' @  ' . \Tracy\Helpers::getSource(),
 			$exceptionFile ? ' @@  ' . basename($exceptionFile) : NULL,
 		]);
 	}
