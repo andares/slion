@@ -47,7 +47,7 @@ class Dispatcher {
     }
 
     public function get($name) {
-        return $this->container->$name;
+        return $this->container->get($name);
     }
 
     /**

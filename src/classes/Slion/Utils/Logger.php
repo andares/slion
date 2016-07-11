@@ -30,4 +30,19 @@ class Logger extends TracyLogger {
         $this->log($arguments[0] ?? '', $name);
     }
 
+	/**
+	 * @param  string|\Exception|\Throwable
+	 * @return string
+	 */
+	protected function formatLogLine($message, $exceptionFile = NULL)
+	{
+		return implode(' ', [
+			@date('[Y-m-d H:i:s]'),
+			preg_replace('#\s*\r?\n\s*#', ' ', $this->formatMessage($message)),
+			' @  ' . Helpers::getSource(),
+			$exceptionFile ? ' @@  ' . basename($exceptionFile) : NULL,
+		]);
+	}
+
+
 }
