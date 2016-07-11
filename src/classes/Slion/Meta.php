@@ -65,6 +65,7 @@ abstract class Meta implements \ArrayAccess, \IteratorAggregate, \Serializable, 
     /**
      * 填充数据
      * @param array $data
+     * @return self
      */
     public function fill($data) {
         if (!is_array($data) && !is_object($data)) {
@@ -74,6 +75,7 @@ abstract class Meta implements \ArrayAccess, \IteratorAggregate, \Serializable, 
         foreach ($this->getDefault() as $name => $default) {
             isset($data[$name]) && $this->$name = $data[$name];
         }
+        return $this;
     }
 
     /**
