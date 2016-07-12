@@ -73,6 +73,7 @@ class ErrorResponse extends Response {
                 'code'      => $this->_error_code,
                 'data'      => $this->toArray(),
             ],
+            'channels'  => [],
         ];
     }
 

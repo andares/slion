@@ -17,7 +17,9 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
      * This method is called before a test is executed.
      */
     protected function setUp() {
-        $this->object = \Slion::logger();
+        global $app;
+        /* @var $app \Slim\App */
+        $this->object = $app->getContainer()->get('logger');
     }
 
     /**

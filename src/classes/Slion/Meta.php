@@ -215,7 +215,7 @@ abstract class Meta implements \ArrayAccess, \IteratorAggregate, \Serializable, 
     }
 
     public function __toString() {
-        return json_encode($this);
+        return \Slion\Pack::encode('json', $this);
     }
 
     public function getDefault($key = null) {

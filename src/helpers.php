@@ -4,7 +4,9 @@ use Tracy\Dumper;
 
 if (!function_exists('tr')) {
     function tr($path, $key, $values = []) {
-        $dict = \Slion::dict();
+        global $app;
+        /* @var $app \Slim\App */
+        $dict = $app->getContainer()->get('dict');
         /* @var $dict Slion\Utils\Dict */
         $dict($path);
 
@@ -17,7 +19,9 @@ if (!function_exists('tr')) {
 
 if (!function_exists('cf')) {
     function cf($path, $key = null) {
-        $config = \Slion::config();
+        global $app;
+        /* @var $app \Slim\App */
+        $config = $app->getContainer()->get('config');
         /* @var $config Slion\Utils\Config */
         if ($key) {
             $config($path);

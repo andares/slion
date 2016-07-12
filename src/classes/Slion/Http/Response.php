@@ -2,7 +2,9 @@
 namespace Slion\Http;
 
 use Slion\Meta;
+use Slion\Components\DependenciesTaker;
 use Slim\Http\Response as RawResponse;
+use Slim\Collection;
 
 /**
  * Http响应
@@ -14,6 +16,21 @@ abstract class Response extends Meta implements DependenciesTaker {
 
     protected $_http_headers = [
     ];
+
+    /**
+     *
+     * @var array
+     */
+    protected $channels = [];
+
+    /**
+     *
+     * @param string $name
+     * @param Collection $data
+     */
+    public function setChannelData(string $name, Collection $data) {
+        $this->channels[$name] = $data;
+    }
 
     public function setHeaders(array $headers = [], $reset = false) {
         $reset && $this->_http_headers = [];
@@ -53,7 +70,29 @@ abstract class Response extends Meta implements DependenciesTaker {
         return [
             'result'    => $this->toArray(),
             'error'     => null,
+            'channels'  => $this->makeChannelArray(),
         ];
+    }
+
+    protected function makeChannelArray() {
+        $result = [];
+        foreach ($this->channels as $name => $data) {
+            /* @var $data Collection */
+            foreach ($data as $key => $row) {
+                if (is_object($row)) {
+                    if (method_exists($row, 'toArray')) {
+                        $result[$name][$key] = $row->toArray();
+                    } else {
+                        $result[$name][$key] = json_encode($row);
+                    }
+                } elseif (is_callable($row)) {
+                    $result[$name][$key] = $row();
+                } else {
+                    $result[$name][$key] = $row;
+                }
+            }
+        }
+        return $result;
     }
 
     public function takeDependencies(\Slim\Container $container) {}

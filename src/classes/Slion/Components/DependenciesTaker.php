@@ -1,6 +1,6 @@
 <?php
 
-namespace Slion\Http;
+namespace Slion\Components;
 
 use Slim\Container;
 

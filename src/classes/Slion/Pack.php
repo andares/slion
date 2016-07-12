@@ -14,6 +14,16 @@ class Pack {
      */
     private static $codecs = [];
 
+    /**
+     *
+     * @var type
+     */
+    private static $settings = [];
+
+    public static function setSettings(array $setting) {
+        self::$settings = $setting;
+    }
+
     public static function encode($format, $value) {
         return self::getCodec($format)->encode($value);
     }
@@ -32,9 +42,8 @@ class Pack {
             $class = __CLASS__ . '\\' . ucfirst($format);
             self::$codecs[$format] = new $class();
 
-            $pack_settings = \Slion::getSettings('pack');
-            if (isset($pack_settings[$format])) {
-                self::$codecs[$format]->setSettings($pack_settings[$format]);
+            if (isset(self::$settings[$format])) {
+                self::$codecs[$format]->setSettings(self::$settings[$format]);
             }
         }
         return self::$codecs[$format];

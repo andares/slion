@@ -3,7 +3,7 @@
 namespace Slion\Http\Response;
 
 use Slion\Http\Response;
-use Slion\Http\DependenciesTaker;
+use Slion\Components\DependenciesTaker;
 use Slim\Http\Response as RawResponse;
 
 /**

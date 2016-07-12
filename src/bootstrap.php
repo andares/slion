@@ -1,33 +1,26 @@
 <?php
 // create slim app
 $settings   = $GLOBALS['settings'];
-if (isset($settings['settings'])) {
-    $app        = new \Slim\App($settings);
-    $GLOBALS['app'] = $app;
-}
+$app        = new \Slim\App($settings);
+$GLOBALS['app'] = $app;
 
-$slion_bootstrap = function(array $settings) {
-    global $app;
-
+$slion_bootstrap = function(\Slim\App $app, array $settings) {
     // 自动载入
     require __DIR__ . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR .
         'Slion' . DIRECTORY_SEPARATOR . 'Init.php';
     Slion\Init::registerAutoload($settings['libraries']);
     Slion\Init::importLibrary(__DIR__ . DIRECTORY_SEPARATOR . 'classes');
 
-    // 存一下settings
-    \Slion::setSettings($settings);
+    // 初始化配置、语言包、日志等并注入容器
+    Slion\Init::utilsSetup($app->getContainer(), $settings['utils']);
 
-    // 初始化配置、语言包、日志等
-    $utils = Slion\Init::utilsSetup($settings['utils']);
+    // Pack 配置
+    \Slion\Pack::setSettings($settings['pack']);
 
     // 调试功能
-    if ($app) {
-        $display_error_details = $app->getContainer()->get('settings')['displayErrorDetails'];
-    } else {
-        $display_error_details = false;
-    }
-    Slion\Init::debuggerSetup($settings['tracy'], $utils['logger'], $display_error_details);
+    $display_error_details = $app->getContainer()->get('settings')['displayErrorDetails'];
+    Slion\Init::debuggerSetup($settings['tracy'], $app->getContainer()->get('logger'),
+        $display_error_details);
 
     // PHP环境
     Slion\Init::iniSetup($settings['php_ini']);
@@ -38,10 +31,11 @@ $slion_bootstrap = function(array $settings) {
     }
     require __DIR__ . DIRECTORY_SEPARATOR . 'helpers.php';
 
-    // 注入容器
-    if ($app) {
-        Slion\Init::injectUtils($app->getContainer(), $utils);
-    }
+    // Hooks
+    $app->getContainer()['hook'] = function(\Slim\Container $c) {
+        return new \Slion\Hook($c);
+    };
+    require __DIR__ . DIRECTORY_SEPARATOR . 'hooks.php';
 };
 
-$slion_bootstrap($settings['slion_settings']);
+$slion_bootstrap($app, $settings['slion_settings']);

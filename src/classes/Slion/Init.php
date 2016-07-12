@@ -69,20 +69,11 @@ class Init {
         Debugger::$maxLength    = $tracy_settings['max_length'];
     }
 
-    public static function utilsSetup($setting) {
-        $utils = [];
+    public static function utilsSetup(Container $container, array $setting) {
         foreach ($setting as $name => $config) {
-            $class = "\\Slion\\Utils\\" . ucfirst($name);
-            $utils[$name] = new $class(...$config);
-        }
-        \Slion::setUtils($utils);
-        return $utils;
-    }
-
-    public static function injectUtils(Container $container, array $utils) {
-        foreach ($utils as $name => $object) {
-            $container[$name] = function($c) use ($object) {
-                return $object;
+            $container[$name] = function($c) use ($name, $config) {
+                $class = "\\Slion\\Utils\\" . ucfirst($name);
+                return new $class(...$config);
             };
         }
     }

@@ -3,6 +3,7 @@ namespace Slion\Http;
 
 use Slion\Meta;
 use Slion\Pack;
+use Slion\Components\DependenciesTaker;
 
 
 /**
