@@ -82,13 +82,11 @@ class Dispatcher {
             $controller = new $class($this);
 
             // 生成access对象
-            list($response, $request) = $this->makeAccessMessage($controller, $action);
+            $access_object = $this->makeAccessMessage($controller, $action);
+            $response = $access_object[0];
             /* @var $response Response */
 
-            // TODO 这里的处理有潜在可能的问题需要注意，如果$ext在其他地方被使用会导致数级值变化
-            $request && array_unshift($ext, $request);
-
-            $controller->$action($response, ...$ext);
+            $controller->$action(...$access_object, ...$ext);
             $response->confirm();
             $response->applyHeaders($this->response);
         } catch (\Exception $exc) {

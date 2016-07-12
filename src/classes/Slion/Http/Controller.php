@@ -36,7 +36,12 @@ abstract class Controller {
             throw new \BadMethodCallException("method not exist $action@" . __DIR__);
         }
 
-        isset($arguments[1]) && $this->_log4request($arguments[1]);
+        if (isset($arguments[1]) && $arguments[1] instanceof Request) {
+            $request = $arguments[1];
+        } else {
+            $request = '[]';
+        }
+        $this->_log4request($request);
         $this->$method(...$arguments);
         $this->_log4response($arguments[0]);
     }
@@ -54,11 +59,13 @@ abstract class Controller {
 
     protected function _log4request($request) {
         if ($this->logger) {
-            $this->logger->info("receive request:" . ($request ?? '[]'), ['controller']);
+            $this->logger->info("receive request:$request", ['controller']);
         }
+        return true;
     }
 
     protected function _log4response($response) {
         $this->logger && $this->logger->info("send response:$response", ['controller']);
+        return true;
     }
 }
