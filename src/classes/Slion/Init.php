@@ -2,7 +2,6 @@
 namespace Slion;
 
 use Slim\Container;
-use Slim\Collection;
 use Tracy\Debugger;
 
 /**
