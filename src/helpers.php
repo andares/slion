@@ -76,9 +76,9 @@ if (!function_exists('ds')) {
 }
 
 if (!function_exists('dlog')) {
-    function dlog($message, $priority = 'debug') {
+    function dlog($message, $priority = 'debug', $trace = '') {
         $logger = Debugger::getLogger();
-        $logger($message, $priority);
+        $logger($message, $priority, $trace);
     }
 }
 

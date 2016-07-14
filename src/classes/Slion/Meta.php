@@ -45,7 +45,7 @@ abstract class Meta implements \ArrayAccess, \IteratorAggregate, \Serializable, 
         foreach ($this->getDefault() as $name => $default) {
             $method = "_confirm_$name";
             if ($this->$name === null && $default === null) {
-                throw new \InvalidArgumentException("meta field [$name] could not be empty", 10006);
+                throw new \InvalidArgumentException("meta field [$name] could not be empty");
             }
             if (method_exists($this, $method)) {
                 $this->$name = $this->$method($this->$name);

@@ -81,11 +81,6 @@ class Init {
         foreach ($settings as $name => $value) {
             ini_set($name, $value);
         }
-
-        // 检查一下生产环境配置
-        if (Debugger::$productionMode && ini_get('zend.assertions') != -1) {
-            throw new \RuntimeException('zend.assertions should be -1 in production mode');
-        }
     }
 
 }

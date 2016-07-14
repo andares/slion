@@ -9,6 +9,8 @@ use Tracy\Logger as TracyLogger;
  * @author andares
  */
 class Logger extends TracyLogger {
+    protected $trace = '';
+
     public function __construct($directory, $email = NULL, \Tracy\BlueScreen $blueScreen = NULL) {
         // 创建目录
         $this->mkdir($directory);
@@ -22,8 +24,12 @@ class Logger extends TracyLogger {
         }
     }
 
-    public function __invoke($message, $priority = 'debug') {
+    public function __invoke($message, $priority = 'debug', $trace = '') {
+        $trace && $this->trace = $trace;
+
         $this->log($message, $priority);
+
+        $trace && $this->trace = '';
     }
 
     public function __call($name, $arguments) {
@@ -36,12 +42,14 @@ class Logger extends TracyLogger {
 	 */
 	protected function formatLogLine($message, $exceptionFile = NULL)
 	{
-		return implode(' ', [
+        $line = [
 			@date('[Y-m-d H:i:s]'),
 			preg_replace('#\s*\r?\n\s*#', ' ', $this->formatMessage($message)),
 			' @  ' . \Tracy\Helpers::getSource(),
 			$exceptionFile ? ' @@  ' . basename($exceptionFile) : NULL,
-		]);
+		];
+        $this->trace && $line[] = "\n" . $this->trace;
+		return implode(' ', $line);
 	}
 
 

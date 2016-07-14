@@ -89,15 +89,17 @@ class Dispatcher {
             $controller->$action(...$access_object, ...$ext);
             $response->confirm();
             $response->applyHeaders($this->response);
+
+            $this->get('hook')->take(\Slion\HOOK_BEFORE_RESPONSE, $this);
         } catch (\Exception $exc) {
-            $response = $this->handleException($exc, $this->response);
+            $response = $this->handleException($exc);
         }
 
         return $response;
     }
 
-    protected function handleException(\Exception $exc, RawResponse $response) {
-        return ErrorResponse::handleException($exc, $response);
+    protected function handleException(\Exception $exc) {
+        return ErrorResponse::handleException($exc, $this->container);
     }
 
     protected function makeAccessMessage(Controller $controller, $action) {

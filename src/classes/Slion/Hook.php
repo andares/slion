@@ -44,6 +44,6 @@ class Hook {
         }
 
         $taker = $this->takers[$name];
-        $taker($this->handlers, $caller, $this->container, ...$args);
+        $taker($this->handlers[$name], $caller, $this->container, ...$args);
     }
 }

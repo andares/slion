@@ -36,6 +36,11 @@ $slion_bootstrap = function(\Slim\App $app, array $settings) {
         return new \Slion\Hook($c);
     };
     require __DIR__ . DIRECTORY_SEPARATOR . 'hooks.php';
+
+    // 检查PHP assert的配置
+    if (is_prod() && ini_get('zend.assertions') != -1) {
+        throw new \RuntimeException('zend.assertions should be -1 in production mode');
+    }
 };
 
 $slion_bootstrap($app, $settings['slion_settings']);
