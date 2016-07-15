@@ -92,13 +92,18 @@ class Dispatcher {
 
             $this->get('hook')->take(\Slion\HOOK_BEFORE_RESPONSE, $this);
         } catch (\Exception $exc) {
-            $response = $this->handleException($exc);
+            if (isset($response)) {
+                /* @var $response Response */
+                $response = $response->raiseError($exc, $this->container);
+            } else {
+                $response = $this->raiseError($exc);
+            }
         }
 
         return $response;
     }
 
-    protected function handleException(\Exception $exc) {
+    protected function raiseError(\Exception $exc) {
         return ErrorResponse::handleException($exc, $this->container);
     }
 

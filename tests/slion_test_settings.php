@@ -3,8 +3,14 @@ return [
     'libraries' => [ // 需要通过autoload导入的目录
         __DIR__ . '/classes',
     ],
+    'http'      => [
+        'debug_in_web'      => true,        // 是否在http返回中使用tracy调试
+    ],
     'php_ini'   => [
         'assert.exception'  => 1,
+    ],
+    'php_ini_check' => [
+        'zend.assertions'   => -1,
     ],
     'helpers'   => [    // 自定义helper方法库
     ],

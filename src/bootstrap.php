@@ -38,8 +38,8 @@ $slion_bootstrap = function(\Slim\App $app, array $settings) {
     require __DIR__ . DIRECTORY_SEPARATOR . 'hooks.php';
 
     // 检查PHP assert的配置
-    if (is_prod() && ini_get('zend.assertions') != -1) {
-        throw new \RuntimeException('zend.assertions should be -1 in production mode');
+    if (is_prod()) {
+        Slion\Init::iniCheck($settings['php_ini_check']);
     }
 };
 

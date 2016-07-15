@@ -83,4 +83,12 @@ class Init {
         }
     }
 
+    public static function iniCheck(array $settings) {
+        foreach ($settings as $name => $value) {
+            if (ini_get($name) != $value) {
+                throw new \RuntimeException("$name should be $value");
+            }
+        }
+    }
+
 }

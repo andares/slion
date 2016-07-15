@@ -20,6 +20,16 @@ abstract class PhpView extends Response implements DependenciesTaker {
      */
     private $renderer;
 
+    /**
+     * @todo 这里要待扩展成 view error response
+     * @param \Exception $exc
+     * @param \Slim\Container $container
+     * @return \self
+     */
+    public function raiseError(\Exception $exc, \Slim\Container $container): self {
+        return ErrorResponse::handleException($exc, $container);
+    }
+
     public function regress(RawResponse $response) {
         return $this->renderer->render($response, $this->_template, $this->toArray());
     }
@@ -29,6 +39,8 @@ abstract class PhpView extends Response implements DependenciesTaker {
     }
 
     public function takeDependencies(\Slim\Container $container) {
+        parent::takeDependencies($container);
+
         $this->renderer = $container['renderer'];
         if (!($this->renderer instanceof \Slim\Views\PhpRenderer)) {
             throw new \RuntimeException("require Slim Php-View to render page");

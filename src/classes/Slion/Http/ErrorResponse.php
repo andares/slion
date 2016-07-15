@@ -35,7 +35,8 @@ class ErrorResponse extends Response {
      * @return self
      */
     public static function handleException(\Exception $exc, \Slim\Container $container) {
-        if (is_prod() || $exc->getCode()) {
+        if ((is_prod() || $exc->getCode()) ||
+            !$container->get('slion_settings')['http']['debug_in_web']) {
             $response = new static([]);
             $response->by($exc);
 
@@ -43,7 +44,11 @@ class ErrorResponse extends Response {
             return $response->confirm();
         }
 
-        \Tracy\Debugger::exceptionHandler($exc, true);
+        return static::debugException($exc);
+    }
+
+    protected static function debugException(\Exception $exc) {
+        return \Tracy\Debugger::exceptionHandler($exc, true);
     }
 
     public function __call($name, $arguments) {
@@ -58,12 +63,19 @@ class ErrorResponse extends Response {
         $this->_message = $message;
     }
 
+    /**
+     * @param \Exception $exc
+     */
     public function by(\Exception $exc) {
         $this->_exc = $exc;
 
         $this->_error_code  = $exc->getCode();
         $message = \tr(static::$_message_dict, $this->_error_code);
-        $this->_message     = $message == $this->_error_code ? $exc->getMessage() : $message;
+        if (!is_prod() && $this->_error_code === 0) {
+            $this->_message = $exc->getMessage();
+        } else {
+            $this->_message = ($message === $this->_error_code) ? $exc->getMessage() : $message;
+        }
     }
 
     protected function makeProtocol() {

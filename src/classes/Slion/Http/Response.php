@@ -49,6 +49,10 @@ abstract class Response extends Meta implements DependenciesTaker {
         }
     }
 
+    public function raiseError(\Exception $exc, \Slim\Container $container): self {
+        return ErrorResponse::handleException($exc, $container);
+    }
+
     /**
      *
      * @param RawResponse $response
