@@ -37,9 +37,9 @@ $hook->attach(HOOK_REGRESS_RESPONSE, function(Http\Dispatcher $caller,
 
     $slow_time = $c->get('slion_settings')['debug']['slow_log'];
     if ($slow_time) {
-        $timecost = (microtime(true) - \Tracy\Debugger::$time);
+        $timecost = (microtime(true) - \Tracy\Debugger::$time) * 1000;
         if ($timecost > $slow_time) {
-            $time = str_pad(number_format($timecost * 1000, 2, '.', ''), 9, '0', STR_PAD_LEFT);
+            $time = str_pad(number_format($timecost, 2, '.', ''), 9, '0', STR_PAD_LEFT);
             dlog("slow logged: $time ms");
         }
     }
