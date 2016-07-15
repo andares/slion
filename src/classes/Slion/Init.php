@@ -22,7 +22,6 @@ class Init {
                 } catch (\Exception $exc) {
                     return false;
                 }
-
                 if (class_exists($classname) || interface_exists($classname) ||
                     trait_exists($classname)) {
                     return true;
@@ -49,12 +48,12 @@ class Init {
         return $imported;
     }
 
-    public static function debuggerSetup(array $tracy_settings, Utils\Logger $logger,
+    public static function tracySetup(array $settings, Utils\Logger $logger,
         $display_error_details = false) {
 
         // 设定模式
-        if (isset($tracy_settings['is_prod'])) {
-            $is_prod = $tracy_settings['is_prod'];
+        if (isset($settings['is_prod'])) {
+            $is_prod = $settings['is_prod'];
         } else {
             $is_prod = $display_error_details ? Debugger::DEVELOPMENT : Debugger::PRODUCTION;
         }
@@ -64,8 +63,20 @@ class Init {
         Debugger::setLogger($logger);
 
         // 配置
-        Debugger::$maxDepth     = $tracy_settings['max_depth'];
-        Debugger::$maxLength    = $tracy_settings['max_length'];
+        Debugger::$maxDepth     = $settings['max_depth'];
+        Debugger::$maxLength    = $settings['max_length'];
+        Debugger::$strictMode   = $settings['strict_mode'];
+        Debugger::$scream       = $settings['scream'];
+    }
+
+    public static function debuggerSetup(array $settings) {
+        // 接管 Tracy Handler
+        if ($settings['error_handler']) {
+        	set_error_handler($settings['error_handler']);
+        }
+        if ($settings['exception_handler']) {
+    		set_exception_handler($settings['exception_handler']);
+        }
     }
 
     public static function utilsSetup(Container $container, array $setting) {

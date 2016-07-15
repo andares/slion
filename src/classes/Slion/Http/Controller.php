@@ -33,7 +33,7 @@ abstract class Controller {
         $method = "action$action";
 
         if (!method_exists($this, $method)) {
-            throw new \BadMethodCallException("method not exist $action@" . __DIR__);
+            throw new \BadMethodCallException("action [$action] is not exist");
         }
 
         if (isset($arguments[1]) && $arguments[1] instanceof Request) {

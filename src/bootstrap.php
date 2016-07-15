@@ -19,8 +19,11 @@ $slion_bootstrap = function(\Slim\App $app, array $settings) {
 
     // 调试功能
     $display_error_details = $app->getContainer()->get('settings')['displayErrorDetails'];
-    Slion\Init::debuggerSetup($settings['tracy'], $app->getContainer()->get('logger'),
+    Slion\Init::tracySetup($settings['tracy'], $app->getContainer()->get('logger'),
         $display_error_details);
+
+    // 接管tracy handler
+    Slion\Init::debuggerSetup($settings['debug']);
 
     // PHP环境
     Slion\Init::iniSetup($settings['php_ini']);

@@ -78,7 +78,10 @@ class Dispatcher {
     public function call($controller_name, $action, array $ext = []) {
         try {
             // 生成controller
-            $class      = $this->getControllerClass($controller_name);
+            $class = $this->getControllerClass($controller_name);
+            if (!class_exists($class)) {
+                throw new \BadMethodCallException("controller [$controller_name] is not exists");
+            }
             $controller = new $class($this);
 
             // 生成access对象
@@ -91,6 +94,13 @@ class Dispatcher {
             $response->applyHeaders($this->response);
 
             $this->get('hook')->take(\Slion\HOOK_BEFORE_RESPONSE, $this);
+        } catch (\BadMethodCallException $exc) {
+            // 处理未定义的接口
+            dlog($exc->getMessage(), 'error');
+            $response = $this->raiseError(
+                new \BadMethodCallException("action [$action@$controller_name] is not exists"),
+                404);
+
         } catch (\Exception $exc) {
             if (isset($response)) {
                 /* @var $response Response */
@@ -103,8 +113,10 @@ class Dispatcher {
         return $response;
     }
 
-    protected function raiseError(\Exception $exc) {
-        return ErrorResponse::handleException($exc, $this->container);
+    protected function raiseError(\Exception $exc, int $code = 0) {
+        $response = ErrorResponse::handleException($exc, $this->container);
+        $code && $response->setHttpCode($code);
+        return $response;
     }
 
     protected function makeAccessMessage(Controller $controller, $action) {
@@ -112,6 +124,9 @@ class Dispatcher {
 
         // 创建response
         $response_class = "{$prefix}Response";
+        if (!class_exists($response_class)) {
+            throw new \BadMethodCallException("response of action [$action] is not exist");
+        }
         $response   = new $response_class();
         /* @var $response Response */
         $response->takeDependencies($this->container);

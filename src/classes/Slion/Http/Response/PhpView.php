@@ -11,7 +11,7 @@ use Slim\Http\Response as RawResponse;
  *
  * @author andares
  */
-abstract class PhpView extends Response implements DependenciesTaker {
+abstract class PhpView extends Response {
     protected $_template = 'index.phtml';
 
     /**

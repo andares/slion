@@ -1,6 +1,5 @@
 <?php
 namespace Slion\Http;
-use Tracy\Debugger;
 
 /**
  *
@@ -25,7 +24,7 @@ class ErrorResponse extends Response {
      * @todo 暂时还是先200
      * @var int
      */
-    protected $_http_code    = 200;
+    protected $_http_code    = 500;
 
     protected $_message = '';
 
@@ -36,7 +35,7 @@ class ErrorResponse extends Response {
      */
     public static function handleException(\Exception $exc, \Slim\Container $container) {
         if ((is_prod() || $exc->getCode()) ||
-            !$container->get('slion_settings')['http']['debug_in_web']) {
+            !$container->get('slion_settings')['debug']['debug_in_web']) {
             $response = new static([]);
             $response->by($exc);
 
@@ -48,7 +47,7 @@ class ErrorResponse extends Response {
     }
 
     protected static function debugException(\Exception $exc) {
-        return \Tracy\Debugger::exceptionHandler($exc, true);
+        return \Slion\Debugger::exceptionHandler($exc, true);
     }
 
     public function __call($name, $arguments) {
