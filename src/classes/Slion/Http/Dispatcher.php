@@ -89,6 +89,13 @@ class Dispatcher {
             $response = $access_object[0];
             /* @var $response Response */
 
+            if (isset($access_object[1]) && $access_object[1] instanceof Request) {
+                $request = $access_object[1];
+            } else {
+                $request = '[]';
+            }
+            assert($this->_log4request($request));
+
             $controller->$action(...$access_object, ...$ext);
             $response->confirm();
             $response->applyHeaders($this->response);
@@ -96,8 +103,7 @@ class Dispatcher {
             $this->get('hook')->take(\Slion\HOOK_BEFORE_RESPONSE, $this);
         } catch (\BadMethodCallException $exc) {
             // 处理未定义的接口
-            dlog($exc->getMessage(), 'error');
-            $response = $this->raiseError(
+            return $this->raiseError(
                 new \BadMethodCallException("action [$action@$controller_name] is not exists"),
                 404);
 
@@ -110,6 +116,7 @@ class Dispatcher {
             }
         }
 
+        assert($this->_log4response($response));
         return $response;
     }
 
@@ -143,6 +150,22 @@ class Dispatcher {
         }
 
         return [$response, $request];
+    }
+
+    protected function _log4request($request) {
+        $logger = $this->get('logger');
+        if ($logger) {
+            $logger->info("receive request:$request");
+        }
+        return true;
+    }
+
+    protected function _log4response($response) {
+        $logger = $this->get('logger');
+        if ($logger) {
+            $logger->info("send response(" . $response->getHttpCode() . "):$response");
+        }
+        return true;
     }
 
 }

@@ -62,8 +62,12 @@ abstract class Response extends Meta implements DependenciesTaker {
         return $response->withJson($this, $this->_http_code);
     }
 
-    public function setHttpCode($code = 200) {
+    public function setHttpCode(int $code = 200) {
         $this->_http_code = $code;
+    }
+
+    public function getHttpCode(): int {
+        return $this->_http_code;
     }
 
     public function jsonSerialize() {

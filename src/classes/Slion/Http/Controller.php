@@ -36,14 +36,7 @@ abstract class Controller {
             throw new \BadMethodCallException("action [$action] is not exist");
         }
 
-        if (isset($arguments[1]) && $arguments[1] instanceof Request) {
-            $request = $arguments[1];
-        } else {
-            $request = '[]';
-        }
-        $this->_log4request($request);
         $this->$method(...$arguments);
-        $this->_log4response($arguments[0]);
     }
 
     public function call($controller_name, $action, array $ext = []) {
@@ -55,17 +48,5 @@ abstract class Controller {
 
     public function __get($name) {
         return $this->dispatcher ? $this->dispatcher->get($name) : null;
-    }
-
-    protected function _log4request($request) {
-        if ($this->logger) {
-            $this->logger->info("receive request:$request", ['controller']);
-        }
-        return true;
-    }
-
-    protected function _log4response($response) {
-        $this->logger && $this->logger->info("send response:$response", ['controller']);
-        return true;
     }
 }
