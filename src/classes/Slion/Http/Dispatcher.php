@@ -68,6 +68,8 @@ class Dispatcher {
 
     public function route($controller_name, $action, array $ext = []) {
         $response = $this->call($controller_name, $action, $ext);
+
+        $this->get('hook')->take(\Slion\HOOK_REGRESS_RESPONSE, $this, $response);
         return $response->regress($this->response);
     }
 
@@ -100,7 +102,7 @@ class Dispatcher {
             $response->confirm();
             $response->applyHeaders($this->response);
 
-            $this->get('hook')->take(\Slion\HOOK_BEFORE_RESPONSE, $this);
+            $this->get('hook')->take(\Slion\HOOK_BEFORE_RESPONSE, $this, $response);
         } catch (\BadMethodCallException $exc) {
             // 处理未定义的接口
             return $this->raiseError(

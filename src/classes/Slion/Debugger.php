@@ -22,9 +22,13 @@ class Debugger {
             $priority = (($severity & E_NOTICE) || ($severity & E_WARNING)) ? 'warning' : 'error';
             dlog($exc->getMessage(), $priority, $exc->getTraceAsString());
         } else {
-            dlog($exc->getMessage(), 'error', $exc->getTraceAsString());
+            dlog(self::makeExceptionLine($exc), 'exception', $exc->getTraceAsString());
         }
         return TracyDebugger::exceptionHandler($exc, $exit);
+    }
+
+    protected static function makeExceptionLine(\Exception $exc) {
+        return '[' . get_class($exc) . '](' . $exc->getCode() . ') ' . $exc->getMessage();
     }
 
 }

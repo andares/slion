@@ -5,6 +5,7 @@ return [
     ],
     'debug'     => [
         'debug_in_web'      => true,        // 是否在http返回中使用tracy调试
+        'slow_log'          => 10,          // 慢请求记录，设0不限，单位毫秒，不计输出
         'error_handler'     => ['\\Slion\\Debugger', 'errorHandler'],
         'exception_handler' => ['\\Slion\\Debugger', 'exceptionHandler'],
     ],
