@@ -193,9 +193,16 @@ class Console {
         return $this->isCommand($parent);
     }
 
+    /**
+     * 添加一个命令。
+     *
+     * 如果在同一域下重复添加，后者不会生效。
+     *
+     * @param \Slion\Console\Command $command
+     */
     public function add(Console\Command $command) {
         $domain = $command->getDomain();
-        if (isset($this->commands[$domain])) {
+        if (!$domain || isset($this->commands[$domain])) {
             return;
         }
         $this->commands[$domain] = $command;
