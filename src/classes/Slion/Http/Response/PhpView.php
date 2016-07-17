@@ -22,11 +22,11 @@ abstract class PhpView extends Response {
 
     /**
      * @todo 这里要待扩展成 view error response
-     * @param \Exception $exc
+     * @param \Throwable $exc
      * @param \Slim\Container $container
      * @return \self
      */
-    public function raiseError(\Exception $exc, \Slim\Container $container): self {
+    public function raiseError(\Throwable $exc, \Slim\Container $container): self {
         return ErrorResponse::handleException($exc, $container);
     }
 

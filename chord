@@ -3,22 +3,91 @@
 /**
  * @author andares
  */
-// TODO: check include path
-//ini_set('include_path', ini_get('include_path').PATH_SEPARATOR.dirname(__FILE__).'/../../../../../worker/local/lib/php'.PATH_SEPARATOR.dirname(__FILE__).'/../../../../../worker/local/lib/swood/classes');
-
-use Molbaselib\Mps\Test as T;
-
 define('IN_CONSOLE', 1);
-require __DIR__.'/bootstrap/autoload.php';
-$app = require_once __DIR__.'/bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
-$params = new \Molbaselib\Mps\Console\Params($argv);
-$result = $params->call();
+// console boot
+$chord_bootstrap = function(Slim\Container $container, string $src) {
+    // 注册chord默认载入指令
+    Slion\Console::$default_map[] = ["$src/classes/Slion", 'Slion'];
 
-if (is_string($result)) {
-echo "\n$result\n\n";
-} else {
-echo "\ndone.\n\n";
+    // 初始化配置与语言包
+    $container['chord_config'] = function($c) use ($src) {
+        return new Slion\Utils\Config("$src/config", 'master', 'dev');
+    };
+    $container['chord_dict'] = function($c) use ($src) {
+        return new Slion\Utils\Dict("$src/i18n", 'zh_CN.utf8');
+    };
+};
+
+// 载入环境
+$settings = require __DIR__ . '/src/settings.php';
+require __DIR__ . '/vendor/autoload.php';
+
+// 创建控制台
+/* @var $app \Slim\App */
+$container = $app->getContainer();
+$container['chord'] = function ($c) {
+    return new Slion\Chord();
+};
+$chord = $container->get('chord');
+/* @var $chord \Slion\Console */
+
+// 载入commands
+foreach ($container->get('slion_settings')['commands'] as $commands_file) {
+    if (!file_exists($commands_file)) {
+        $chord->ec("Commands file not found: $commands_file", 'warn');
+        continue;
+    }
+    require $commands_file;
 }
 
+// 扫描目录
+$classes_dir = __DIR__ . "/src/classes";
+if (file_exists($classes_dir)) {
+    $it = new \RecursiveDirectoryIterator($classes_dir);
+    foreach ($it as $file) {
+        /* @var $file \SplFileInfo */
+        if (!$file->isDir()) {
+            continue;
+        }
+        $chord->map($file->getRealPath(), $file->getBasename());
+    }
+}
+
+// 设置console
+$chord->setDefaultDomain('slion');
+
+// helpers
+function chord_tr($path, $key, ...$values) {
+    global $app;
+    /* @var $app \Slim\App */
+    $dict = $app->getContainer()->get('chord_dict');
+    /* @var $dict Slion\Utils\Dict */
+    $dict($path);
+
+    if ($values) {
+        return $dict->assign($key, $values);
+    }
+    return $dict[$key];
+}
+
+function chord_cf($path, $key = null) {
+    global $app;
+    /* @var $app \Slim\App */
+    $config = $app->getContainer()->get('chord_config');
+    /* @var $config Slion\Utils\Config */
+    if ($key) {
+        $config($path);
+        return $config[$key];
+    }
+    return $config($path);
+}
+
+
+try {
+    $result = $chord($argv);
+    $chord->ec("$result");
+} catch (Throwable $exc) {
+    $chord->ec($exc->getMessage(), 'halt');
+//    du($chord);
+}

@@ -11,5 +11,5 @@ return [
     ],
 
     // slion settings
-    'slion_settings' => require __DIR__ . '/slion_test_settings.php',
+    'slion_settings' => require __DIR__ . '/slion_settings.php',
 ];

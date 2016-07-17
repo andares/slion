@@ -12,8 +12,8 @@ class Dict extends Config {
         parent::__construct($base_dir, $scene, $default_scene);
     }
 
-    public function assign($key, $values) {
-        return sprintf($key, $values);
+    public function assign($key, array $values) {
+        return sprintf($this[$key], ...$values);
     }
 
     public function offsetGet($offset) {

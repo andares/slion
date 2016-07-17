@@ -16,6 +16,10 @@ return [
         'zend.assertions'   => -1,
     ],
     'helpers'   => [    // 自定义helper方法库
+//        __DIR__ . '/helpers.php',
+    ],
+    'commands'  => [    // 自定义commands指令加载文件
+//        __DIR__ . '/commands.php',
     ],
     'pack'      => [], // pack 配置
     'tracy'     => [

@@ -18,7 +18,7 @@ $hook->add(HOOK_BEFORE_RESPONSE, function(array $handlers,
 });
 
 $hook->add(HOOK_ERROR_RESPONSE, function(array $handlers,
-    Http\ErrorResponse $caller, \Slim\Container $c, \Exception $exc) {
+    Http\ErrorResponse $caller, \Slim\Container $c, \Throwable $exc) {
     foreach ($handlers as $handler) {
         $handler($caller, $exc, $c);
     }

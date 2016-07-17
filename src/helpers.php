@@ -3,7 +3,7 @@ use Tracy\Debugger;
 use Tracy\Dumper;
 
 if (!function_exists('tr')) {
-    function tr($path, $key, $values = []) {
+    function tr($path, $key, ...$values) {
         global $app;
         /* @var $app \Slim\App */
         $dict = $app->getContainer()->get('dict');

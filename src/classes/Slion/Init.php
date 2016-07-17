@@ -19,7 +19,7 @@ class Init {
 
                 try {
                     include "$classname.php";
-                } catch (\Exception $exc) {
+                } catch (\Throwable $exc) {
                     return false;
                 }
                 if (class_exists($classname) || interface_exists($classname) ||

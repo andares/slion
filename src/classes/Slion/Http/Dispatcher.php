@@ -109,7 +109,7 @@ class Dispatcher {
                 new \BadMethodCallException("action [$action@$controller_name] is not exists"),
                 404);
 
-        } catch (\Exception $exc) {
+        } catch (\Throwable $exc) {
             if (isset($response)) {
                 /* @var $response Response */
                 $response = $response->raiseError($exc, $this->container);
@@ -122,7 +122,7 @@ class Dispatcher {
         return $response;
     }
 
-    protected function raiseError(\Exception $exc, int $code = 0) {
+    protected function raiseError(\Throwable $exc, int $code = 0) {
         $response = ErrorResponse::handleException($exc, $this->container);
         $code && $response->setHttpCode($code);
         return $response;

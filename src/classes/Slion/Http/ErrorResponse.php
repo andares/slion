@@ -14,26 +14,25 @@ class ErrorResponse extends Response {
 
     /**
      *
-     * @var \Exception
+     * @var \Throwable
      */
     private $_exc;
 
     protected $_error_code = 0;
 
     /**
-     * @todo 暂时还是先200
      * @var int
      */
-    protected $_http_code    = 500;
+    protected $_http_code    = 200;
 
     protected $_message = '';
 
     /**
      *
-     * @param \Exception $exc
+     * @param \Throwable $exc
      * @return self
      */
-    public static function handleException(\Exception $exc, \Slim\Container $container) {
+    public static function handleException(\Throwable $exc, \Slim\Container $container) {
         if ((is_prod() || $exc->getCode()) ||
             !$container->get('slion_settings')['debug']['debug_in_web']) {
             $response = new static([]);
@@ -46,7 +45,7 @@ class ErrorResponse extends Response {
         return static::debugException($exc);
     }
 
-    protected static function debugException(\Exception $exc) {
+    protected static function debugException(\Throwable $exc) {
         return \Slion\Debugger::exceptionHandler($exc, true);
     }
 
@@ -63,9 +62,9 @@ class ErrorResponse extends Response {
     }
 
     /**
-     * @param \Exception $exc
+     * @param \Throwable $exc
      */
-    public function by(\Exception $exc) {
+    public function by(\Throwable $exc) {
         $this->_exc = $exc;
 
         $this->_error_code  = $exc->getCode();
