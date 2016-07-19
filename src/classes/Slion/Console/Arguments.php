@@ -48,6 +48,12 @@ class Arguments {
         $name   = '( \$([^\>\] \:\=]*))';
         $value  = '((\:|\=)([^\>\]]*))';
         preg_match_all("/(\<|\[)$arg$name?$value?(\>|\])/", $pattern, $result);
+        foreach ($result[0] as $key => $body) {
+            // 处理名字
+
+            $option['require'] = $result[1][$key] === '<';
+            $option['require'] = $result[1][$key] === '<';
+        }
         du($result);
         return [];
     }

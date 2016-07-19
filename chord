@@ -58,6 +58,7 @@ if (file_exists($classes_dir)) {
 $chord->setDefaultDomain('slion');
 
 // helpers
+// TODO 这里的用法在用户继承创建自己的console command时会有问题
 function chord_tr($path, $key, ...$values) {
     global $app;
     /* @var $app \Slim\App */
