@@ -13,13 +13,16 @@ $slion_bootstrap = function(Slim\Container $container, array $settings) {
     Slion\Init::registerAutoload($settings['libraries']);
     Slion\Init::importLibrary(__DIR__ . DIRECTORY_SEPARATOR . 'classes');
 
+    // 初始化自身相关资源
+    Slion\Init::selfSetup($container, __DIR__);
+
     // 初始化配置、语言包、日志等并注入容器
     Slion\Init::utilsSetup($container, $settings['utils']);
 
     // Pack 配置
     Slion\Pack::setSettings($settings['pack']);
 
-    // 调试功能
+    // tracy 初始化
     $display_error_details = $container->get('settings')['displayErrorDetails'];
     Slion\Init::tracySetup($settings['tracy'], $container->get('logger'),
         $display_error_details);

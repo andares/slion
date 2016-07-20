@@ -27,35 +27,33 @@ class Command {
         return $this->actions;
     }
 
-    public function __call($name, $arguments) {
-        return $this->console->$name(...$arguments);
-    }
-
-    public function __invoke(array $argv) {
-        $this->init();
-
-        if (!$argv) {
-            $this->getBaseHelp($this->domain);
-            $this->printCommandsList(str_repeat(' ', 3), $this->getCommandsList($this->domain));
+    public function __invoke($action, array $argv) {
+        if (!$this->init()) {
             return '';
         }
 
-        $action     = array_shift($argv);
         $arguments  = $this->getArguments($action, $argv);
 
+        // 调用action
         return '';
     }
 
     protected function getArguments(string $action, array $argv): Arguments {
         if (!isset($this->actions[$action])) {
             throw new \BadMethodCallException(
-                chord_tr('console/errors', 'action_not_found', $this->domain, $action));
+            s__tr('console/errors', 'action_not_found', $this->domain, $action));
         }
         $argumens = new Arguments($this->actions[$action]);
         return $argumens($argv);
     }
 
-    public function init() {}
+    public function init(): bool {
+        return true;
+    }
+
+    public function getHelp(): string {
+        return '';
+    }
 
     public function getDomain() {
         return $this->domain;

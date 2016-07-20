@@ -7,33 +7,27 @@ define('IN_CONSOLE', 1);
 
 // console boot
 $chord_bootstrap = function(Slim\Container $container, string $src) {
-    // 注册chord默认载入指令
-    Slion\Console::$default_map[] = ["$src/classes/Slion", 'Slion'];
-
-    // 初始化配置与语言包
-    $container['chord_config'] = function($c) use ($src) {
-        return new Slion\Utils\Config("$src/config", 'master', 'dev');
+    $container['chord'] = function ($c) {
+        return new Slion\Chord($c);
     };
-    $container['chord_dict'] = function($c) use ($src) {
-        return new Slion\Utils\Dict("$src/i18n", 'zh_CN.utf8');
-    };
+    $chord = $container->get('chord');
+    /* @var $chord \Slion\Console */
+    $chord->map("$src/classes/Slion", 'Slion');
+    // 设置console
+    $chord->setDefaultDomain('slion');
 };
 
 // 载入环境
 $settings = require __DIR__ . '/src/settings.php';
 require __DIR__ . '/vendor/autoload.php';
 
-// 创建控制台
+// 获取 $chord
 /* @var $app \Slim\App */
-$container = $app->getContainer();
-$container['chord'] = function ($c) {
-    return new Slion\Chord();
-};
-$chord = $container->get('chord');
+$chord = $app->getContainer()->get('chord');
 /* @var $chord \Slion\Console */
 
 // 载入commands
-foreach ($container->get('slion_settings')['commands'] as $commands_file) {
+foreach ($app->getContainer()->get('slion_settings')['commands'] as $commands_file) {
     if (!file_exists($commands_file)) {
         $chord->ec("Commands file not found: $commands_file", 'warn');
         continue;
@@ -54,41 +48,12 @@ if (file_exists($classes_dir)) {
     }
 }
 
-// 设置console
-$chord->setDefaultDomain('slion');
-
-// helpers
-// TODO 这里的用法在用户继承创建自己的console command时会有问题
-function chord_tr($path, $key, ...$values) {
-    global $app;
-    /* @var $app \Slim\App */
-    $dict = $app->getContainer()->get('chord_dict');
-    /* @var $dict Slion\Utils\Dict */
-    $dict($path);
-
-    if ($values) {
-        return $dict->assign($key, $values);
-    }
-    return $dict[$key];
-}
-
-function chord_cf($path, $key = null) {
-    global $app;
-    /* @var $app \Slim\App */
-    $config = $app->getContainer()->get('chord_config');
-    /* @var $config Slion\Utils\Config */
-    if ($key) {
-        $config($path);
-        return $config[$key];
-    }
-    return $config($path);
-}
-
-
 try {
     $result = $chord($argv);
     $chord->ec("$result");
 } catch (Throwable $exc) {
     $chord->ec($exc->getMessage(), 'halt');
-//    du($chord);
+
+    $chord->ec($exc->getTraceAsString());
 }
+//du($chord);

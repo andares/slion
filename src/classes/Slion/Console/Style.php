@@ -17,6 +17,7 @@ class Style {
 
     protected $themes = [
         'info'  => ['cyan'],
+        'clear' => ['light_cyan'],
         'high'  => ['dark_gray', 'bg_light_cyan'],
         'warn'  => ['yellow', 'bg_dark_gray'],
         'halt'  => ['black', 'bg_red'],

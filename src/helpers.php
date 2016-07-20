@@ -2,6 +2,38 @@
 use Tracy\Debugger;
 use Tracy\Dumper;
 
+/**
+ * slion reserved func
+ */
+
+function s__tr($path, $key, ...$values) {
+    global $app;
+    /* @var $app \Slim\App */
+    $dict = $app->getContainer()->get('slion_dict');
+    /* @var $dict Slion\Utils\Dict */
+    $dict($path);
+
+    if ($values) {
+        return $dict->assign($key, $values);
+    }
+    return $dict[$key];
+}
+
+function s__cf($path, $key = null) {
+    global $app;
+    /* @var $app \Slim\App */
+    $config = $app->getContainer()->get('slion_config');
+    /* @var $config Slion\Utils\Config */
+    if ($key) {
+        $config($path);
+        return $config[$key];
+    }
+    return $config($path);
+}
+
+/**
+ * common func, can be covered
+ */
 if (!function_exists('tr')) {
     function tr($path, $key, ...$values) {
         global $app;

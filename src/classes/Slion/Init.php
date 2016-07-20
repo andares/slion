@@ -79,6 +79,16 @@ class Init {
         }
     }
 
+    public static function selfSetup(Container $container, string $src) {
+        // 初始化配置与语言包
+        $container['slion_config'] = function($c) use ($src) {
+            return new Utils\Config("$src/config", 'master', 'dev');
+        };
+        $container['slion_dict'] = function($c) use ($src) {
+            return new Utils\Dict("$src/i18n", 'zh_CN.utf8');
+        };
+    }
+
     public static function utilsSetup(Container $container, array $setting) {
         foreach ($setting as $name => $config) {
             $container[$name] = function($c) use ($name, $config) {
