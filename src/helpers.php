@@ -108,9 +108,9 @@ if (!function_exists('ds')) {
 }
 
 if (!function_exists('dlog')) {
-    function dlog($message, $priority = 'debug', $trace = '') {
+    function dlog($message, $priority = 'debug') {
         $logger = Debugger::getLogger();
-        $logger($message, $priority, $trace);
+        $logger($message, $priority);
     }
 }
 

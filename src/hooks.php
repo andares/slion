@@ -13,27 +13,27 @@ const HOOK_REGRESS_RESPONSE = 'slion:regress_response';
 $hook->add(HOOK_BEFORE_RESPONSE, function(array $handlers,
     Http\Dispatcher $caller, \Slim\Container $c, Http\Response $response) {
     foreach ($handlers as $handler) {
-        $handler($caller, $response, $c);
+        $handler($caller, $c, $response);
     }
 });
 
 $hook->add(HOOK_ERROR_RESPONSE, function(array $handlers,
     Http\ErrorResponse $caller, \Slim\Container $c, \Throwable $exc) {
     foreach ($handlers as $handler) {
-        $handler($caller, $exc, $c);
+        $handler($caller, $c, $exc);
     }
 });
 
 $hook->add(HOOK_REGRESS_RESPONSE, function(array $handlers,
     Http\Dispatcher $caller, \Slim\Container $c, Http\Response $response) {
     foreach ($handlers as $handler) {
-        $handler($caller, $response, $c);
+        $handler($caller, $c, $response);
     }
 });
 
 // attach hook taker
 $hook->attach(HOOK_REGRESS_RESPONSE, function(Http\Dispatcher $caller,
-    Http\Response $response, \Slim\Container $c) {
+    \Slim\Container $c, Http\Response $response) {
 
     $slow_time = $c->get('slion_settings')['debug']['slow_log'];
     if ($slow_time) {

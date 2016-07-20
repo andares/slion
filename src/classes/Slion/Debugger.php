@@ -20,24 +20,16 @@ class Debugger {
             /* @var $throwed \ErrorException|\Error */
             $severity = $throwed->getSeverity();
             $priority = (($severity & E_NOTICE) || ($severity & E_WARNING)) ? 'warning' : 'error';
-            dlog($throwed->getMessage(), $priority, $throwed->getTraceAsString());
+            dlog($throwed, $priority);
         } elseif ($throwed instanceof \Error) {
-            dlog(self::makeErrorLine($throwed), 'error', $throwed->getTraceAsString());
+            dlog($throwed, 'error');
         } elseif ($throwed instanceof \Exception) {
-            dlog(self::makeExceptionLine($throwed), 'exception', $throwed->getTraceAsString());
+            dlog($throwed, 'exception');
         } else {
-            dlog($throwed->getMessage(), 'warning', $throwed->getTraceAsString());
+            dlog($throwed, 'warning');
         }
 
         return TracyDebugger::exceptionHandler($throwed, $exit);
-    }
-
-    protected static function makeErrorLine(\Error $error) {
-        return '[' . get_class($error) . '](' . $error->getCode() . ') ' . $error->getMessage();
-    }
-
-    protected static function makeExceptionLine(\Exception $exc) {
-        return '[' . get_class($exc) . '](' . $exc->getCode() . ') ' . $exc->getMessage();
     }
 
 }

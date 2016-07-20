@@ -9,7 +9,7 @@ use Tracy\Logger as TracyLogger;
  * @author andares
  */
 class Logger extends TracyLogger {
-    protected $trace = '';
+    public $enableBlueScreen = false;
 
     public function __construct($directory, $email = NULL, \Tracy\BlueScreen $blueScreen = NULL) {
         // 创建目录
@@ -24,12 +24,8 @@ class Logger extends TracyLogger {
         }
     }
 
-    public function __invoke($message, $priority = 'debug', $trace = '') {
-        $trace && $this->trace = $trace;
-
-        $this->log($message, $priority);
-
-        $trace && $this->trace = '';
+    public function __invoke($object, $priority = 'debug') {
+        $this->log($object, $priority);
     }
 
     public function __call($name, $arguments) {
@@ -48,9 +44,21 @@ class Logger extends TracyLogger {
 			' @  ' . \Tracy\Helpers::getSource(),
 			$exceptionFile ? ' @@  ' . basename($exceptionFile) : NULL,
 		];
-        $this->trace && $line[] = "\n" . $this->trace;
+		if ($message instanceof \Exception || $message instanceof \Throwable) {
+            $line[] = "\n" . $message->getTraceAsString();
+        }
 		return implode(' ', $line);
 	}
 
-
+    /**
+     * 强烈建议不要开启 enableBlueScreen ，现有的功能已经足够调试。
+     * 开启之后，需要同时关闭严格模式，否则当出现错误连续抛相同违例时，会发生违例 bluescreen 因文件名相同而报错的问题。
+     *
+     * @param type $exception
+     * @param type $file
+     * @return type
+     */
+	protected function logException($exception, $file = NULL) {
+        return $this->enableBlueScreen ? parent::logException($exception, $file) : '';
+	}
 }
