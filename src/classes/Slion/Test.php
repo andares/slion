@@ -9,7 +9,6 @@ namespace Slion;
 class Test {
     public static function init() {
         global $app;
-        du('slim app inited', 'test');
     }
 
     public static function run(callable $func, $times = 1) {

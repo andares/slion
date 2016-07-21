@@ -46,6 +46,13 @@ abstract class Controller {
         return $this->dispatcher->call($controller_name, $action, $ext);
     }
 
+    public function getUploadedFiles() {
+        if ($this->dispatcher) {
+            return $this->dispatcher->getRawRequest()->getUploadedFiles();
+        }
+        return [];
+    }
+
     public function __get($name) {
         return $this->dispatcher ? $this->dispatcher->get($name) : null;
     }
