@@ -20,7 +20,7 @@
         "files": ["src/bootstrap.php"]
     },
     "scripts": {
-        "post-update-cmd": [
+        "post-package-update": [
             "php -r \"copy('vendor/slion/slion/chord', 'chord');\"",
             "chmod +x chord"
         ]
