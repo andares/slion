@@ -16,9 +16,6 @@
         "slim/slim": "^3.1",
         "kevinlebrun/colors.php": "^1.0"
     },
-    "require-dev": {
-        "phpunit/phpunit": "*"
-    },
     "autoload": {
         "files": ["src/bootstrap.php"]
     },
