@@ -49,6 +49,11 @@ abstract class Meta implements \ArrayAccess, \IteratorAggregate, \Serializable, 
             }
             if (method_exists($this, $method)) {
                 $this->$name = $this->$method($this->$name);
+            } elseif (is_object($this->$name)) {
+                $object = $this->$name;
+                if ($object instanceof self) {
+                    $object->confirm();
+                }
             }
         }
 
@@ -140,7 +145,7 @@ abstract class Meta implements \ArrayAccess, \IteratorAggregate, \Serializable, 
     }
 
     protected static function unpack($data) {
-        return Pack::decode(static::$_serialize_format, $value);
+        return Pack::decode(static::$_serialize_format, $data);
     }
 
     /**
@@ -150,7 +155,17 @@ abstract class Meta implements \ArrayAccess, \IteratorAggregate, \Serializable, 
     public function toArray() {
         $arr = [];
         foreach ($this->getDefault() as $name => $default) {
-            $arr[$name] = isset($this->$name) ? $this->$name : $default;
+            if (isset($this->$name)) {
+                if (is_object($this->$name)) {
+                    $object     = $this->$name;
+                    $arr[$name] = method_exists($object, 'toArray') ?
+                        $object->toArray() : Pack::encode('json', $object);
+                } else {
+                    $arr[$name] = $this->$name;
+                }
+            } else {
+                $arr[$name] = $default;
+            }
         }
         return $arr;
     }
@@ -215,7 +230,11 @@ abstract class Meta implements \ArrayAccess, \IteratorAggregate, \Serializable, 
     }
 
     public function __toString() {
-        return \Slion\Pack::encode('json', $this);
+        return Pack::encode('json', $this->toArray());
+    }
+
+    public function toBin() {
+        return Pack::encode('msgpack', $this->toArray());
     }
 
     public function getDefault($key = null) {

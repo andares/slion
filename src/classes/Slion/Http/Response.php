@@ -2,6 +2,7 @@
 namespace Slion\Http;
 
 use Slion\Meta;
+use Slion\Pack;
 use Slion\Components\DependenciesTaker;
 use Slim\Http\Response as RawResponse;
 use Slim\Collection;
@@ -91,7 +92,7 @@ abstract class Response extends Meta implements DependenciesTaker {
                     if (method_exists($row, 'toArray')) {
                         $result[$name][$key] = $row->toArray();
                     } else {
-                        $result[$name][$key] = json_encode($row);
+                        $result[$name][$key] = Pack::encode('json', $row);
                     }
                 } elseif (is_callable($row)) {
                     $result[$name][$key] = $row();
