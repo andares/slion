@@ -10,6 +10,13 @@ use Tracy\Debugger;
  * @author andares
  */
 class Init {
+    /**
+     * @todo 存在优化可能
+     * @todo slim中使用了closure的bindTo()方法，可以改进为php7的call()方法，效率更高
+     * @param \Slim\App $app
+     * @param array $routes
+     * @param \Slion\callable $register
+     */
     public static function dispatchByRoutes(\Slim\App $app, array $routes, callable $register = null) {
         if (!$register) {
             $register = function(\Slim\App $app, string $module, string $space) {
