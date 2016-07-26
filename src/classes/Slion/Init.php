@@ -10,6 +10,24 @@ use Tracy\Debugger;
  * @author andares
  */
 class Init {
+    public static function dispatchByRoutes(\Slim\App $app, array $routes, callable $register = null) {
+        if (!$register) {
+            $register = function(\Slim\App $app, string $module, string $space) {
+                $app->any("/$module/{controller}[/{action}[/{more:.*}]]",
+                    function ($request, $response, $args) use ($space) {
+
+                    $dispatcher = new Http\Dispatcher($space, $this, $request, $response);
+                    return $dispatcher->route($args['controller'], $args['action'] ?? 'index',
+                        explode('/', $request->getAttribute('more')));
+                })->setName($module);
+            };
+        }
+
+        foreach ($routes as $module => $space) {
+            $register($app, $module, $space);
+        }
+    }
+
     public static function registerAutoload(array $libraries, callable $autoload = null) {
         if ($autoload) {
             spl_autoload_register($autoload);
