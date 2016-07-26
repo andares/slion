@@ -19,12 +19,6 @@
     "autoload": {
         "files": ["src/bootstrap.php"]
     },
-    "scripts": {
-        "post-update-cmd": [
-            "php -r \"copy('vendor/slion/slion/chord', 'chord');\"",
-            "chmod +x chord"
-        ]
-    },
     "bin": ["chord"],
     "minimum-stability": "stable"
 }
