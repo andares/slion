@@ -6,7 +6,7 @@ namespace Slion\Meta;
  *
  * @author andares
  */
-trait Base {
+abstract class Base implements \IteratorAggregate {
     /**
      * 结构及默认值配置
      * @var array
@@ -74,7 +74,7 @@ trait Base {
             if (isset($this->$name)) {
                 if (is_object($this->$name)) {
                     $object     = $this->$name;
-                    if ($object instanceof \Slion\Meta) {
+                    if ($object instanceof \Slion\Meta\Base) {
                         $arr[$name] = $object->confirm()->toArray();
                     } else {
                         $arr[$name] = method_exists($object, 'toArray') ?

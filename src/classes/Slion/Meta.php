@@ -5,8 +5,8 @@ namespace Slion;
  *
  * @author andares
  */
-abstract class Meta implements \IteratorAggregate, \ArrayAccess, \Serializable, \JsonSerializable {
-    use Meta\Base, Meta\Access, Meta\Serializable, Meta\Json;
+abstract class Meta extends Meta\Base implements \ArrayAccess, \Serializable, \JsonSerializable {
+    use Meta\Access, Meta\Serializable, Meta\Json;
 
     /**
      * 构造器
