@@ -29,6 +29,8 @@ abstract class Controller {
     }
 
     public function __call($name, array $arguments) {
+        $this->get('hook')->take(\Slion\HOOK_BEFORE_ACTION, $this, $name, ...$arguments);
+
         $action = ucfirst($name);
         $method = "action$action";
 
