@@ -1,5 +1,6 @@
 <?php
 namespace Slion\Meta;
+use Slion\Pack;
 
 /**
  * Description of Base
