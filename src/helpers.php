@@ -31,6 +31,13 @@ function s__cf($path, $key = null) {
     return $config($path);
 }
 
+if (!function_exists('abort')) {
+    function abort(\Throwable $e, callable $maker = null, ...$arguments): Slion\Abort {
+        $abort = new Slion\Abort($e);
+        return $maker ? $maker($abort, ...$arguments) : $abort;
+    }
+}
+
 /**
  * common func, can be covered
  */
