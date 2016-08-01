@@ -6,23 +6,24 @@ $hook = $app->getContainer()->get('hook');
 /* @var $hook \Slion\Hook */
 
 // add hook
+const HOOK_BEFORE_ACTION    = 'slion:before_action';
 const HOOK_ERROR_RESPONSE   = 'slion:error_response';
 const HOOK_BEFORE_RESPONSE  = 'slion:before_response';
 const HOOK_REGRESS_RESPONSE = 'slion:regress_response';
 
-
-$hook->add(HOOK_BEFORE_RESPONSE, function(array $handlers,
-    Http\Dispatcher $caller, \Slim\Container $c, Http\Response $response) {
-    foreach ($handlers as $handler) {
-        $handler($caller, $c, $response);
-    }
-});
 
 $hook->add(HOOK_BEFORE_ACTION, function(array $handlers,
     Http\Controller $caller, \Slim\Container $c, string $action,
     Http\Response $response, $request = null) {
     foreach ($handlers as $handler) {
         $handler($caller, $c, $action, $response, $request);
+    }
+});
+
+$hook->add(HOOK_BEFORE_RESPONSE, function(array $handlers,
+    Http\Dispatcher $caller, \Slim\Container $c, Http\Response $response) {
+    foreach ($handlers as $handler) {
+        $handler($caller, $c, $response);
     }
 });
 
