@@ -89,11 +89,8 @@ abstract class Response extends Meta implements DependenciesTaker {
             /* @var $data Collection */
             foreach ($data as $key => $row) {
                 if (is_object($row)) {
-                    if (method_exists($row, 'toArray')) {
-                        $result[$name][$key] = $row->toArray();
-                    } else {
-                        $result[$name][$key] = Pack::encode('json', $row);
-                    }
+                    $result[$name][$key] = method_exists($row, 'toArray') ?
+                        $row->toArray() : $row;
                 } elseif (is_callable($row)) {
                     $result[$name][$key] = $row();
                 } else {
