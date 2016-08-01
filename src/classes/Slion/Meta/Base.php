@@ -74,8 +74,12 @@ trait Base {
             if (isset($this->$name)) {
                 if (is_object($this->$name)) {
                     $object     = $this->$name;
-                    $arr[$name] = method_exists($object, 'toArray') ?
-                        $object->toArray() : $object;
+                    if ($object instanceof \Slion\Meta) {
+                        $arr[$name] = $object->confirm()->toArray();
+                    } else {
+                        $arr[$name] = method_exists($object, 'toArray') ?
+                            $object->toArray() : $object;
+                    }
                 } else {
                     $arr[$name] = $this->$name;
                 }

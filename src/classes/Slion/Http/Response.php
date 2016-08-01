@@ -89,8 +89,12 @@ abstract class Response extends Meta implements DependenciesTaker {
             /* @var $data Collection */
             foreach ($data as $key => $row) {
                 if (is_object($row)) {
-                    $result[$name][$key] = method_exists($row, 'toArray') ?
-                        $row->toArray() : $row;
+                    if ($row instanceof \Slion\Meta) {
+                        $result[$name][$key] = $row->confirm()->toArray();
+                    } else {
+                        $result[$name][$key] = method_exists($row, 'toArray') ?
+                            $row->toArray() : $row;
+                    }
                 } elseif (is_callable($row)) {
                     $result[$name][$key] = $row();
                 } else {
