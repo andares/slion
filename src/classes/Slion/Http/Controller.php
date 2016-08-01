@@ -18,18 +18,12 @@ abstract class Controller {
      */
     protected $dispatcher;
 
-    /**
-     *
-     * @var Container
-     */
-    protected $container = null;
-
     public function __construct(Dispatcher $dispatcher = null) {
         $this->dispatcher = $dispatcher;
     }
 
     public function __call($name, array $arguments) {
-        $this->get('hook')->take(\Slion\HOOK_BEFORE_ACTION, $this, $name, ...$arguments);
+        $this->hook->take(\Slion\HOOK_BEFORE_ACTION, $this, $name, ...$arguments);
 
         $action = ucfirst($name);
         $method = "action$action";
