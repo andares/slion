@@ -23,7 +23,7 @@ abstract class Controller {
     }
 
     public function __call($name, array $arguments) {
-        $this->hook->take(\Slion\HOOK_BEFORE_ACTION, $this, $name, ...$arguments);
+        $this->hook && $this->hook->take(\Slion\HOOK_BEFORE_ACTION, $this, $name, ...$arguments);
 
         $action = ucfirst($name);
         $method = "action$action";
