@@ -24,17 +24,23 @@ abstract class Base implements \IteratorAggregate {
      */
     public function confirm() {
         foreach ($this->getDefault() as $name => $default) {
-            $method = "_confirm_$name";
             if ($this->$name === null && $default === null) {
-                throw new \InvalidArgumentException("meta field [$name] could not be empty");
+                $default_method = "_default_$name";
+                if (method_exists($this, $default_method)) {
+                    $this->$name = $this->$default_method();
+                } else {
+                    throw new \InvalidArgumentException("meta field [$name] could not be empty");
+                }
             }
+
+            $method = "_confirm_$name";
             if (method_exists($this, $method)) {
                 $this->$name = $this->$method($this->$name);
-            } elseif (is_object($this->$name)) {
+            }
+
+            if (is_object($this->$name)) {
                 $object = $this->$name;
-                if ($object instanceof self) {
-                    $object->confirm();
-                }
+                ($object instanceof self) && $object->confirm();
             }
         }
 
@@ -74,12 +80,8 @@ abstract class Base implements \IteratorAggregate {
             if (isset($this->$name)) {
                 if (is_object($this->$name)) {
                     $object     = $this->$name;
-                    if ($object instanceof \Slion\Meta\Base) {
-                        $arr[$name] = $object->confirm()->toArray();
-                    } else {
-                        $arr[$name] = method_exists($object, 'toArray') ?
-                            $object->toArray() : $object;
-                    }
+                    $arr[$name] = method_exists($object, 'toArray') ?
+                        $object->toArray() : $object;
                 } else {
                     $arr[$name] = $this->$name;
                 }
