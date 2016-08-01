@@ -13,8 +13,9 @@ use Slion\Components\DependenciesTaker;
  *
  */
 abstract class Request extends Meta implements DependenciesTaker {
-    protected static $_pack_format = 'json';
     protected static $_packed = [];
+    protected static $_pack_format      = 'json';
+    protected static $_upload_fields    = [];
 
     public function confirm() {
         // 解包打包的参数
@@ -30,5 +31,11 @@ abstract class Request extends Meta implements DependenciesTaker {
         return $this->toArray();
     }
 
-    public function takeDependencies(\Slim\Container $container) {}
+    public function takeDependencies(\Slim\Container $container) {
+        // 拉取upload files
+        $upload_files = $container->get('dispatcher')->getRawRequest()->getUploadedFiles();
+        foreach (static::$_upload_fields as $name) {
+            isset($upload_files[$name]) && $this->$name = $upload_files[$name];
+        }
+    }
 }
