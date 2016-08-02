@@ -66,11 +66,16 @@ class Dispatcher {
         return $this->response;
     }
 
-    public function route($controller_name, $action, array $ext = []) {
+    public function route($controller_name, $action, array $ext = []): RawResponse {
         $response = $this->call($controller_name, $action, $ext);
 
         $this->get('hook')->take(\Slion\HOOK_REGRESS_RESPONSE, $this, $response);
-        return $response->regress($this->response);
+
+        return $this->injectCookieHeaders($response->regress($this->response));
+    }
+
+    protected function injectCookieHeaders(RawResponse $response): RawResponse {
+        return $response->withAddedHeader('Set-Cookie', implode('; ', $this->get('cookies')->toHeaders()));
     }
 
     protected function getControllerClass($name) {
@@ -78,6 +83,11 @@ class Dispatcher {
     }
 
     public function call($controller_name, $action, array $ext = []) {
+        // cookie创建
+        $this->container['cookies'] = function ($c) {
+            return new \Slim\Http\Cookies($this->getRawRequest()->getCookieParams());
+        };
+
         try {
             // 生成controller
             $class = $this->getControllerClass($controller_name);
