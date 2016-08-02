@@ -29,8 +29,8 @@ abstract class Request extends Meta implements DependenciesTaker {
 
     public function toArray($not_null = false) {
         $arr = parent::toArray($not_null);
-        if (static::$_packed) {
-            foreach (static::$_packed as $field) {
+        if (static::$_upload_fields) {
+            foreach (static::$_upload_fields as $field) {
                 unset($arr[$field]);
             }
         }
