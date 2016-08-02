@@ -111,4 +111,26 @@ abstract class Base implements \IteratorAggregate {
             static::$_default;
     }
 
+    /**
+     * 重载系列方法
+     * @param type $name
+     * @param type $value
+     */
+    public function __set($name, $value) {
+        $this->_data[$name] = $value;
+    }
+
+    public function __get($name) {
+        $default = $this->getDefault($name);
+        return isset($this->_data[$name]) ? $this->_data[$name] : $default;
+    }
+
+    public function __isset($name) {
+        return isset($this->_data[$name]);
+    }
+
+    public function __unset($name) {
+        unset($this->_data[$name]);
+    }
+
 }
