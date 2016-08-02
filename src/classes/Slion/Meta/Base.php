@@ -72,22 +72,27 @@ abstract class Base implements \IteratorAggregate {
 
     /**
      * 转换到数组
+     * @param bool $not_null
      * @return array
      */
-    public function toArray() {
+    public function toArray($not_null = false) {
         $arr = [];
         foreach ($this->getDefault() as $name => $default) {
             if (isset($this->$name)) {
                 if (is_object($this->$name)) {
-                    $object     = $this->$name;
-                    $arr[$name] = method_exists($object, 'toArray') ?
+                    $object = $this->$name;
+                    $value  = method_exists($object, 'toArray') ?
                         $object->toArray() : $object;
                 } else {
-                    $arr[$name] = $this->$name;
+                    $value  = $this->$name;
                 }
             } else {
-                $arr[$name] = $default;
+                $value  = $default;
             }
+            if ($value === null && $not_null) {
+                continue;
+            }
+            $arr[$name] = $value;
         }
         return $arr;
     }
