@@ -29,7 +29,7 @@ abstract class Base implements \IteratorAggregate {
                 if (method_exists($this, $default_method)) {
                     $this->$name = $this->$default_method();
                 } else {
-                    throw new \InvalidArgumentException("meta field [$name] could not be empty");
+                    throw new \InvalidArgumentException("meta:" . get_called_class() . " field [$name] could not be empty");
                 }
             }
 
