@@ -17,7 +17,11 @@
         "kevinlebrun/colors.php": "^1.0"
     },
     "autoload": {
-        "files": ["src/bootstrap.php"]
+        "psr-4": {"Slion\\": "src/classes/Slion/"},
+        "files": [
+            "src/helpers.php",
+            "src/bootstrap.php"
+        ]
     },
     "bin": ["chord"],
     "minimum-stability": "stable"
