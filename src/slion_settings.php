@@ -14,7 +14,7 @@ return [
     ],
     'logger'    => [
         'dir'   => __DIR__ . '/../logs',
-        'email' => null, // 发邮件
+        'email' => '', // 发邮件
     ],
     'lang'      => 'zh_CN.utf8',
     'pack'      => [], // pack 配置
