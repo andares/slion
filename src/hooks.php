@@ -1,8 +1,7 @@
 <?php
 namespace Slion;
 
-$app  = $GLOBALS['app'];
-$hook = $app->getContainer()->get('hook');
+$hook = $container->get('hook');
 /* @var $hook \Slion\Hook */
 
 // add hook
