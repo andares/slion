@@ -83,13 +83,11 @@ class Run {
      * @return \Slim\App
      */
     public function __invoke() {
-        $tail_stack = [];
         foreach ($this->packages as $name => $init) {
             $init->head($this->app, $this->container, $this->settings);
-            $tail_stack[] = $init;
         }
-        for ($i = (count($tail_stack) - 1); $i >= 0; $i--) {
-            $tail_stack[$i]->tail($this->app, $this->container, $this->settings);
+        foreach ($this->packages as $name => $init) {
+            $init->tail($this->app, $this->container, $this->settings);
         }
 
         return $this->app;
