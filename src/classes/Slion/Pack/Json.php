@@ -21,8 +21,8 @@ class Json implements PackInterface {
     }
 
     public function setSettings(array $settings) {
-        isset($settings['options']) && $this->options = $settings['options'];
-        isset($settings['depth']) && $this->depth = $settings['depth'];
-        isset($settings['assoc']) && $this->assoc = $settings['assoc'];
+        isset($settings['options']) && $this->options   = $settings['options'];
+        isset($settings['depth'])   && $this->depth     = $settings['depth'];
+        isset($settings['assoc'])   && $this->assoc     = $settings['assoc'];
     }
 }

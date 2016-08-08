@@ -7,19 +7,11 @@ namespace Slion\Utils;
  * @author andares
  */
 class Config implements \ArrayAccess {
-    protected $data = [];
-    private $base_dir;
-    private $scene;
-    private $default_scene;
-    private $current_path = '';
+    protected $data     = [];
+    private $scenes     = [];
+    private $current    = '';
 
-    public function __construct($base_dir, $scene, $default_scene = 'default') {
-        $this->base_dir         = $base_dir;
-        $this->scene            = $scene;
-        $this->default_scene    = $default_scene;
-    }
-
-    public function __invoke($path) {
+    public function __invoke(string $path) {
         return $this->select($path);
     }
 
@@ -27,22 +19,33 @@ class Config implements \ArrayAccess {
      *
      * @param type $path
      */
-    public function select($path) {
-        if ($path == $this->current_path) {
+    public function select(string $path) {
+        if ($path == $this->current) {
             return $this->current();
         }
 
         if (!isset($this->data[$path])) {
             $this->data[$path] = [];
-            $this->default_scene && $this->load($this->default_scene, $path);
-            $this->load($this->scene, $path);
+            // 现在一次载入所有场景配置
+            foreach ($this->scenes as $scene => $base_dirs) {
+                foreach ($base_dirs as $base_dir => $default_scene) {
+                    $default_scene && $this->load($base_dir, $default_scene, $path);
+                    $this->load($base_dir, $scene, $path);
+                }
+            }
         }
-        $this->current_path = $path;
+        $this->current = $path;
         return $this->current();
     }
 
-    private function load($scene, $path) {
-        $file = "$this->base_dir/$scene/$path.php";
+    public function addScene(string $scene, string $base_dir,
+        string $default_scene = '') {
+
+        $this->scenes[$scene][$base_dir] = $default_scene;
+    }
+
+    private function load($base_dir, $scene, $path) {
+        $file = "$base_dir/$scene/$path.php";
         if (file_exists($file)) {
             if (!$this->data[$path]) {
                 $this->data[$path] = include $file;
@@ -60,7 +63,7 @@ class Config implements \ArrayAccess {
      * @return array
      */
     public function current() {
-        return $this->data[$this->current_path] ?? [];
+        return $this->data[$this->current] ?? [];
     }
 
     /**

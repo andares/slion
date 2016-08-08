@@ -41,7 +41,7 @@ class Command {
     protected function getArguments(string $action, array $argv): Arguments {
         if (!isset($this->actions[$action])) {
             throw new \BadMethodCallException(
-            s__tr('console/errors', 'action_not_found', $this->domain, $action));
+            tr('console/errors', 'action_not_found', $this->domain, $action));
         }
         $argumens = new Arguments($this->actions[$action]);
         return $argumens($argv);

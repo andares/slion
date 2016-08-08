@@ -1,47 +1,35 @@
 <?php
 return [
-    'libraries' => [ // 需要通过autoload导入的目录
-        __DIR__ . '/classes',
+    'php_ini'   => [
+//        'setup' => [
+//            'assert.exception'  => 1,
+//        ],
+//        'check' => [
+//            'zend.assertions'   => -1,
+//        ],
     ],
+    'config'    => [
+        'scene'     => 'dev',
+        'default'   => 'default', // 默认scene
+    ],
+    'logger'    => [
+        'dir'   => '../logs',
+        'email' => null, // 发邮件
+    ],
+    'lang'      => 'zh_CN.utf8',
+    'pack'      => [], // pack 配置
+
     'debug'     => [
         'debug_in_web'      => true,        // 是否在http返回中使用tracy调试
-        'slow_log'          => 10,          // 慢请求记录，设0不限，单位毫秒，不计输出
+        'slow_log'          => 20,          // 慢请求记录，设0不限，单位毫秒，不计输出
         'error_handler'     => ['\\Slion\\Debugger', 'errorHandler'],
         'exception_handler' => ['\\Slion\\Debugger', 'exceptionHandler'],
     ],
-    'php_ini'   => [
-        'assert.exception'  => 1,
-    ],
-    'php_ini_check' => [
-        'zend.assertions'   => -1,
-    ],
-    'helpers'   => [    // 自定义helper方法库
-//        __DIR__ . '/helpers.php',
-    ],
-    'commands'  => [    // 自定义commands指令加载文件
-//        __DIR__ . '/commands.php',
-    ],
-    'pack'      => [], // pack 配置
     'tracy'     => [
         'is_prod'       => null, // 设置 null 时跟 displayErrorDetails 配置走
         'strict_mode'   => true, // 严格模式强烈建议打开
         'scream'        => true, // 设error_reporting E_ALL
         'max_depth'     => 8,
         'max_length'    => 160,
-    ],
-    'utils'     => [
-        'logger'    => [
-            __DIR__ . '/../logs',
-            null, // 严重错误时发邮件
-        ],
-        'config'    => [
-            __DIR__ . '/config',
-            'dev',
-            'default',
-        ],
-        'dict'      => [
-            __DIR__ . '/i18n',
-            'zh_CN.utf8',
-        ],
     ],
 ];

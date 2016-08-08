@@ -5,21 +5,25 @@
  */
 define('IN_CONSOLE', 1);
 
-// console boot
-$chord_bootstrap = function(Slim\Container $container, string $src) {
-    $container['chord'] = function ($c) {
-        return new Slion\Chord($c);
-    };
-    $chord = $container->get('chord');
-    /* @var $chord \Slion\Console */
-    $chord->map("$src/classes/Slion", 'Slion');
-    // 设置console
-    $chord->setDefaultDomain('slion');
-};
-
 // 载入环境
 $settings = require __DIR__ . '/src/settings.php';
 require __DIR__ . '/vendor/autoload.php';
+
+/* @var $run \Slion\Run */
+$run->setup('chord', new class(__DIR__) extends Slion\Init {
+    public function head(\Slim\App $app, \Slim\Container $container, array $settings) {
+        $container['chord'] = function ($c) {
+            return new Slion\Chord($c);
+        };
+        $chord = $container->get('chord');
+        /* @var $chord \Slion\Console */
+        $chord->map("$this->root/src/classes/Slion", 'Slion');
+        // 设置console
+        $chord->setDefaultDomain('slion');
+    }
+});
+
+$app = $run();
 
 // 获取 $chord
 /* @var $app \Slim\App */
@@ -27,13 +31,8 @@ $chord = $app->getContainer()->get('chord');
 /* @var $chord \Slion\Console */
 
 // 载入commands
-foreach ($app->getContainer()->get('slion_settings')['commands'] as $commands_file) {
-    if (!file_exists($commands_file)) {
-        $chord->ec("Commands file not found: $commands_file", 'warn');
-        continue;
-    }
-    require $commands_file;
-}
+$commands = __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'commands.php';
+file_exists($commands) && require $commands;
 
 // 扫描目录
 $classes_dir = __DIR__ . "/src/classes";

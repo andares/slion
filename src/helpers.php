@@ -2,39 +2,21 @@
 use Tracy\Debugger;
 use Tracy\Dumper;
 
-/**
- * slion reserved func
- */
-
-function s__tr($path, $key, ...$values) {
-    global $app;
-    /* @var $app \Slim\App */
-    $dict = $app->getContainer()->get('slion_dict');
-    /* @var $dict Slion\Utils\Dict */
-    $dict($path);
-
-    if ($values) {
-        return $dict->assign($key, $values);
-    }
-    return $dict[$key];
-}
-
-function s__cf($path, $key = null) {
-    global $app;
-    /* @var $app \Slim\App */
-    $config = $app->getContainer()->get('slion_config');
-    /* @var $config Slion\Utils\Config */
-    if ($key) {
-        $config($path);
-        return $config[$key];
-    }
-    return $config($path);
-}
-
 if (!function_exists('abort')) {
     function abort(\Throwable $e, callable $maker = null, ...$arguments): Slion\Abort {
         $abort = new Slion\Abort($e);
         return $maker ? $maker($abort, ...$arguments) : $abort;
+    }
+}
+
+if (!function_exists('path_for')) {
+    function path_for(string $module, string $controller, string $action, array $queries = [], $ext = '') {
+        global $app;
+        return $app->getContainer()->get('router')->pathFor($module, [
+            'controller'    => $controller,
+            'action'        => $action,
+            'ext'           => $ext
+        ], $queries);
     }
 }
 
@@ -50,7 +32,7 @@ if (!function_exists('tr')) {
         $dict($path);
 
         if ($values) {
-            return $dict->assign($key, $values);
+            return $dict->assign($key, ...$values);
         }
         return $dict[$key];
     }

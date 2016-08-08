@@ -94,7 +94,7 @@ class Console {
 
             if (!$list) {
                 throw new \DomainException(
-                    s__tr('console/errors', 'domain_not_found', $domain));
+                    tr('console/errors', 'domain_not_found', $domain));
             }
         } else {
             $this->printActionHelpList($prefix, $this->getActionHelpList());
@@ -114,7 +114,7 @@ class Console {
             $cmd    = $this->commands[$domain] ?? null;
             if (!$cmd) {
                 throw new \BadFunctionCallException(
-                    s__tr('console/errors', 'cmd_not_found', $domain));
+                    tr('console/errors', 'cmd_not_found', $domain));
             }
         }
         return $cmd($action, $argv);

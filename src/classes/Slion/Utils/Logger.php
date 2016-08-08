@@ -1,6 +1,7 @@
 <?php
 namespace Slion\Utils;
 
+use Slion\Pack;
 use Tracy\Logger as TracyLogger;
 
 /**
@@ -11,25 +12,30 @@ use Tracy\Logger as TracyLogger;
 class Logger extends TracyLogger {
     public $enableBlueScreen = false;
 
-    public function __construct($directory, $email = NULL, \Tracy\BlueScreen $blueScreen = NULL) {
-        // 创建目录
-        $this->mkdir($directory);
-
-        parent::__construct($directory, $email, $blueScreen);
-    }
-
     protected function mkdir($directory) {
         if (!file_exists($directory)) {
             mkdir($directory, 0777, true);
         }
     }
 
+    public function setDirectory(string $dir) {
+        $this->directory = $dir;
+    }
+
+    public function setEmail(string $email) {
+        $this->email = $email;
+    }
+
     public function __invoke($object, $priority = 'debug') {
+        // 增加对数组的支持
+        if (is_array($object)) {
+            $object = Pack::encode('json', $object);
+        }
         $this->log($object, $priority);
     }
 
     public function __call($name, $arguments) {
-        $this->log($arguments[0] ?? '', $name);
+        $this($arguments[0] ?? '', $name);
     }
 
 	/**

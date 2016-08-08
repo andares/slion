@@ -47,7 +47,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
      */
     public function test__call() {
         $log_file = "{$this->object->directory}/custom.log";
-        unlink($log_file);
+//        unlink($log_file);
         $this->object->custom('unit test');
         $this->assertTrue(file_exists($log_file));
     }

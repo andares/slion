@@ -19,7 +19,6 @@
     "autoload": {
         "psr-4": {"Slion\\": "src/classes/Slion/"},
         "files": [
-            "src/helpers.php",
             "src/bootstrap.php"
         ]
     },

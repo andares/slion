@@ -8,14 +8,15 @@ namespace Slion\Utils;
  * @author andares
  */
 class Dict extends Config {
-    public function __construct($base_dir, $scene, $default_scene = null) {
-        parent::__construct($base_dir, $scene, $default_scene);
-    }
-
-    public function assign($key, array $values) {
+    public function assign($key, ...$values) {
         return sprintf($this[$key], ...$values);
     }
 
+    /**
+     * 改变了在找不到的情况下的输出格式
+     * @param type $offset
+     * @return string
+     */
     public function offsetGet($offset) {
         $result = parent::offsetGet($offset);
         return $result ? $result : $offset;
