@@ -20,16 +20,21 @@ class Debugger {
             /* @var $throwed \ErrorException|\Error */
             $severity = $throwed->getSeverity();
             $priority = (($severity & E_NOTICE) || ($severity & E_WARNING)) ? 'warning' : 'error';
-            dlog($throwed, $priority);
+            self::log($throwed, $priority);
         } elseif ($throwed instanceof \Error) {
-            dlog($throwed, 'error');
+            self::log($throwed, 'error');
         } elseif ($throwed instanceof \Exception) {
-            dlog($throwed, 'exception');
+            self::log($throwed, 'exception');
         } else {
-            dlog($throwed, 'warning');
+            self::log($throwed);
         }
 
         return TracyDebugger::exceptionHandler($throwed, $exit);
+    }
+
+    private static function log($message, $priority = 'warning') {
+        $logger = TracyDebugger::getLogger();
+        $logger($message, $priority);
     }
 
 }

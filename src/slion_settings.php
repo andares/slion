@@ -13,7 +13,7 @@ return [
         'default'   => 'default', // 默认scene
     ],
     'logger'    => [
-        'dir'   => '../logs',
+        'dir'   => __DIR__ . '/../logs',
         'email' => null, // 发邮件
     ],
     'lang'      => 'zh_CN.utf8',
