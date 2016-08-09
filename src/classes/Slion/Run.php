@@ -132,7 +132,7 @@ class Run {
      * @return \self
      */
     public function setup(int $seq, callable $boot, string $info = ''): self {
-        $this->extensions[$this->current_extension]['boots'][$seq] = $boot;
+        $this->extensions[$this->current_extension]['boots'][$seq][] = $boot;
         $this->bootstrappers[$seq][] = [
             $this->current_extension,
             $info,
@@ -153,16 +153,20 @@ class Run {
      * @return \Slim\App
      */
     public function __invoke() {
+        ksort($this->bootstrappers);
         foreach ($this->bootstrappers as $seq => $list) {
             if (isset($this->skips[$seq])) {
                 continue;
             }
             foreach ($list as $info) {
                 $extensions = $this->extensions[$info[0]];
-                $extensions['boots'][$seq]($extensions['root'],
-                    $this->app,
-                    $this->container,
-                    $this->settings);
+                foreach ($extensions['boots'][$seq] as $boot) {
+                    $boot($extensions['root'],
+                        $this->app,
+                        $this->container,
+                        $this->settings,
+                        $this);
+                }
             }
         }
 
@@ -173,14 +177,14 @@ class Run {
      * 跳过某些引导序列
      * @param int $seq
      */
-    private function skip(int $seq) {
+    public function skip(int $seq) {
         $this->skips[$seq] = 1;
     }
 
     /**
      * 注册自动载入
      */
-    private function registerAutoload() {
+    public function registerAutoload() {
         spl_autoload_register(function ($classname) {
             $classname  = \str_replace("\\", DIRECTORY_SEPARATOR, $classname);
 
@@ -202,7 +206,7 @@ class Run {
      * @param string $dir
      * @return array
      */
-    private function importLibrary(string $dir): array {
+    public function importLibrary(string $dir): array {
         if (!isset(self::$imported[$dir])) {
             ini_set('include_path', $dir . PATH_SEPARATOR . ini_get('include_path'));
             self::$imported[$dir] = 1;
@@ -216,7 +220,7 @@ class Run {
      * @param array $check_list
      * @throws \RuntimeException
      */
-    private function phpIniReady(array $setup_list = [], array $check_list = []) {
+    public function phpIniReady(array $setup_list = [], array $check_list = []) {
         foreach ($setup_list as $name => $value) {
             ini_set($name, $value);
         }
