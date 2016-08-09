@@ -30,7 +30,31 @@ class Run {
      *
      * @var Init[]
      */
-    private $packages;
+    private $extensions;
+
+    /**
+     *
+     * @var string
+     */
+    private $current_extension;
+
+    /**
+     *
+     * @var array
+     */
+    private $bootstrappers;
+
+    /**
+     *
+     * @var array
+     */
+    private $skips  = [];
+
+    /**
+     *
+     * @var []
+     */
+    private static $imported = [];
 
     /**
      *
@@ -60,9 +84,25 @@ class Run {
     }
 
     /**
+     *
+     * @return \Slim\Container
+     */
+    public function container(): \Slim\Container {
+        return $this->container;
+    }
+
+    /**
+     *
+     * @return array
+     */
+    public function settings(): array {
+        return $this->settings;
+    }
+
+    /**
      * 框架准备
      */
-    public function prepare() {
+    public function ready() {
         $GLOBALS['app'] = $this->app;
         $GLOBALS['run'] = $this;
 
@@ -71,58 +111,75 @@ class Run {
     }
 
     /**
-     * 设置package
-     * @param \Slion\Init $init
+     * 添加一个扩展
+     * @param string $name
+     * @param string $root
+     * @return self
      */
-    public function setup($name, Init $init) {
-        $this->packages[$name] = $init;
+    public function add(string $name, string $root): self {
+        $this->current_extension            = $name;
+        $this->extensions[$name]['root']    = $root;
+        return $this;
     }
 
     /**
-     * 生成环境
+     *
+     * 设置引导
+     *
+     * @param int $seq
+     * @param \Slion\callable $boot
+     * @param string $info
+     * @return \self
+     */
+    public function setup(int $seq, callable $boot, string $info = ''): self {
+        $this->extensions[$this->current_extension]['boots'][$seq] = $boot;
+        $this->bootstrappers[$seq][] = [
+            $this->current_extension,
+            $info,
+        ];
+        return $this;
+    }
+
+    /**
+     *
+     * @return array
+     */
+    public function getBootstrappers() {
+        return $this->bootstrappers;
+    }
+
+    /**
+     * 初始化环境并返回app
      * @return \Slim\App
      */
     public function __invoke() {
-        foreach ($this->packages as $name => $init) {
-            $init->head($this->app, $this->container, $this->settings);
-        }
-        foreach ($this->packages as $name => $init) {
-            $init->tail($this->app, $this->container, $this->settings);
+        foreach ($this->bootstrappers as $seq => $list) {
+            if (isset($this->skips[$seq])) {
+                continue;
+            }
+            foreach ($list as $info) {
+                $extensions = $this->extensions[$info[0]];
+                $extensions['boots'][$seq]($extensions['root'],
+                    $this->app,
+                    $this->container,
+                    $this->settings);
+            }
         }
 
         return $this->app;
-
-//        \Slion\Init::dispatchByRoutes($app, cf('routes'),
-//            function(\Slim\App $app, string $module, string $space) {
-//
-//            $app->any("/$module/{controller}[/{action}[/{more:.*}]]",
-//                function ($request, $response, $args) use ($space) {
-//
-//                $dispatcher = new \LionCommon\Http\Dispatcher($space, $this, $request, $response);
-//                return $dispatcher->route($args['controller'], $args['action'] ?? 'index',
-//                    explode('/', $request->getAttribute('more')));
-//            })->setName($module);
-//        });
     }
 
-    public static function dispatchByRoutes(\Slim\App $app, array $routes, callable $register = null) {
-        if (!$register) {
-            $register = function(\Slim\App $app, string $module, string $space) {
-                $app->any("/$module/{controller}[/{action}[/{more:.*}]]",
-                    function ($request, $response, $args) use ($space) {
-
-                    $dispatcher = new Http\Dispatcher($space, $this, $request, $response);
-                    return $dispatcher->route($args['controller'], $args['action'] ?? 'index',
-                        explode('/', $request->getAttribute('more')));
-                })->setName($module);
-            };
-        }
-
-        foreach ($routes as $module => $space) {
-            $register($app, $module, $space);
-        }
+    /**
+     * 跳过某些引导序列
+     * @param int $seq
+     */
+    private function skip(int $seq) {
+        $this->skips[$seq] = 1;
     }
 
+    /**
+     * 注册自动载入
+     */
     private function registerAutoload() {
         spl_autoload_register(function ($classname) {
             $classname  = \str_replace("\\", DIRECTORY_SEPARATOR, $classname);
@@ -138,5 +195,35 @@ class Run {
             }
             return false;
         });
+    }
+
+    /**
+     * 导入库
+     * @param string $dir
+     * @return array
+     */
+    private function importLibrary(string $dir): array {
+        if (!isset(self::$imported[$dir])) {
+            ini_set('include_path', $dir . PATH_SEPARATOR . ini_get('include_path'));
+            self::$imported[$dir] = 1;
+        }
+        return self::$imported;
+    }
+
+    /**
+     * php ini检测
+     * @param array $setup_list
+     * @param array $check_list
+     * @throws \RuntimeException
+     */
+    private function phpIniReady(array $setup_list = [], array $check_list = []) {
+        foreach ($setup_list as $name => $value) {
+            ini_set($name, $value);
+        }
+        foreach ($check_list as $name => $value) {
+            if (ini_get($name) != $value) {
+                throw new \RuntimeException("PHP ini [$name] should be $value");
+            }
+        }
     }
 }

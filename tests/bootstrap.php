@@ -9,3 +9,4 @@ require __DIR__ . '/../vendor/autoload.php';
 $run = $GLOBALS['run'];
 /* @var $run \Slion\Run */
 $run();
+//var_dump($run->getBootstrappers());

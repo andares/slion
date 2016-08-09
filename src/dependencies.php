@@ -3,16 +3,16 @@
 namespace Slion;
 
 // 配置
-$container['config'] = function(\Slim\Container $c) {
+$container['config'] = function(\Slim\Container $c) use ($root) {
     $config = new Utils\Config();
-    $config->addScene('master', "$this->root/config", 'dev');
+    $config->addScene('master', "$root/config", 'dev');
     return $config;
 };
 
 // 语言包
-$container['dict'] = function(\Slim\Container $c) {
+$container['dict'] = function(\Slim\Container $c) use ($root) {
     $dict = new Utils\Dict();
-    $dict->addScene('zh_CN.utf8', "$this->root/i18n");
+    $dict->addScene('zh_CN.utf8', "$root/i18n");
     return $dict;
 };
 
