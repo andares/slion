@@ -133,10 +133,7 @@ class Run {
      */
     public function setup(int $seq, callable $boot, string $info = ''): self {
         $this->extensions[$this->current_extension]['boots'][$seq][] = $boot;
-        $this->bootstrappers[$seq][] = [
-            $this->current_extension,
-            $info,
-        ];
+        $this->bootstrappers[$seq][$this->current_extension][]       = $info;
         return $this;
     }
 
@@ -158,10 +155,10 @@ class Run {
             if (isset($this->skips[$seq])) {
                 continue;
             }
-            foreach ($list as $info) {
-                $extensions = $this->extensions[$info[0]];
-                foreach ($extensions['boots'][$seq] as $boot) {
-                    $boot($extensions['root'],
+            foreach ($list as $extension_name => $info) {
+                $extension = $this->extensions[$extension_name];
+                foreach ($extension['boots'][$seq] as $boot) {
+                    $boot($extension['root'],
                         $this->app,
                         $this->container,
                         $this->settings,
