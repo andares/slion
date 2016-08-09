@@ -100,6 +100,15 @@ class Run {
     }
 
     /**
+     *
+     * @param string $extension_name
+     * @return string
+     */
+    public function root(string $extension_name): string {
+        return $this->extensions[$extension_name]['root'];
+    }
+
+    /**
      * 框架准备
      */
     public function ready() {
@@ -119,6 +128,16 @@ class Run {
     public function add(string $name, string $root): self {
         $this->current_extension            = $name;
         $this->extensions[$name]['root']    = $root;
+        return $this;
+    }
+
+    /**
+     *
+     * @param string $name
+     * @return self
+     */
+    public function select(string $name): self {
+        $this->current_extension    = $name;
         return $this;
     }
 
