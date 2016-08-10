@@ -3,25 +3,25 @@ namespace Slion;
 use Slim\{App, Container};
 use Tracy\Debugger;
 
-
-// 约定从全局取配置
-$settings   = $GLOBALS['settings'];
-
 // 创建run
-$run = new Run(new \Slim\App($GLOBALS['settings']));
-
-// 准备基础环境
-$run->ready();
+$run = new Run();
 
 // setup自身
 $run->add('slion', __DIR__)
 
-    ->setup(10, function(string $root, App $app, Container $container, array $settings) {
+    ->setup(10, function(string $root, Run $run) {
+        // 约定从全局取配置
+        $container  = $GLOBALS['settings'];
         require "$root/dependencies.php";
-    }, 'load dependencies')
+        $run->ready($container);
+    }, 'load dependencies & ready')
 
     ->setup(20, new class() {
-        public function __invoke(string $root, App $app, Container $container, array $settings) {
+        public function __invoke(string $root, Run $run) {
+            $app        = $run->app();
+            $container  = $run->container();
+            $settings   = $run->settings();
+
             $this->setTracy($settings['tracy'], $container->get('logger'),
                 $container->get('settings')['displayErrorDetails']);
             $this->setErrorHandler($settings['debug']);
@@ -59,11 +59,19 @@ $run->add('slion', __DIR__)
         }
     }, 'init tracy & debugger')
 
-    ->setup(30, function(string $root, App $app, Container $container, array $settings) {
+    ->setup(30, function(string $root, Run $run) {
+        $app        = $run->app();
+        $container  = $run->container();
+        $settings   = $run->settings();
+
         require "$root/hooks.php";
     }, 'init hooks')
 
-    ->setup(50, function(string $root, App $app, Container $container, array $settings) {
+    ->setup(50, function(string $root, Run $run) {
+        $app        = $run->app();
+        $container  = $run->container();
+        $settings   = $run->settings();
+
         require "$root/helpers.php";
     }, 'load helpers');
 

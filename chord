@@ -1,5 +1,9 @@
 #!/usr/bin/env php
 <?php
+use Slim\{App, Container};
+use Slion\{Run};
+use Tracy\Debugger;
+
 /**
  * @author andares
  */
@@ -10,24 +14,27 @@ $settings = require __DIR__ . '/src/settings.php';
 require __DIR__ . '/vendor/autoload.php';
 
 /* @var $run \Slion\Run */
-$run->setup('chord', new class(__DIR__) extends Slion\Init {
-    public function head(\Slim\App $app, \Slim\Container $container, array $settings) {
+$run->add('chord', __DIR__)
+
+    ->setup(70, function(string $root, Run $run) {
+        $app        = $run->app();
+        $container  = $run->container();
+        $settings   = $run->settings();
+
+        // 加入容器
         $container['chord'] = function ($c) {
             return new Slion\Chord($c);
         };
         $chord = $container->get('chord');
         /* @var $chord \Slion\Console */
-        $chord->map("$this->root/src/classes/Slion", 'Slion');
-        // 设置console
-        $chord->setDefaultDomain('slion');
-    }
-});
 
-$app = $run();
+        // 载入slion自带功能
+        $chord->map($run->root('slion') . "/classes/Slion", 'Slion');
+        $chord->setDefaultDomain('slion');
+    }, 'chord init');
 
 // 获取 $chord
-/* @var $app \Slim\App */
-$chord = $app->getContainer()->get('chord');
+$chord = $run()->getContainer()->get('chord');
 /* @var $chord \Slion\Console */
 
 // 载入commands

@@ -12,19 +12,19 @@ class Run {
      *
      * @var \Slim\App
      */
-    private $app;
+    private $app = null;
 
     /**
      *
      * @var \Slim\Container
      */
-    private $container;
+    private $container = null;
 
     /**
      *
      * @var array
      */
-    private $settings;
+    private $settings = [];
 
     /**
      *
@@ -56,14 +56,8 @@ class Run {
      */
     private static $imported = [];
 
-    /**
-     *
-     * @param \Slim\App $app
-     */
-    public function __construct(\Slim\App $app) {
-        $this->app          = $app;
-        $this->container    = $app->getContainer();
-        $this->settings     = $this->container->get('slion_settings');
+    public function __construct() {
+        $GLOBALS['run'] = $this;
     }
 
     /**
@@ -111,9 +105,14 @@ class Run {
     /**
      * 框架准备
      */
-    public function ready() {
+    public function ready(array $container) {
+        // 构建自身
+        $this->app          = new \Slim\App($container);
+        $this->container    = $this->app->getContainer();
+        $this->settings     = $this->container->get('slion_settings');
+
+        // 导入全局
         $GLOBALS['app'] = $this->app;
-        $GLOBALS['run'] = $this;
 
         // 注册自动载入
         $this->registerAutoload();
@@ -177,11 +176,7 @@ class Run {
             foreach ($list as $extension_name => $info) {
                 $extension = $this->extensions[$extension_name];
                 foreach ($extension['boots'][$seq] as $boot) {
-                    $boot($extension['root'],
-                        $this->app,
-                        $this->container,
-                        $this->settings,
-                        $this);
+                    $boot($extension['root'], $this);
                 }
             }
         }

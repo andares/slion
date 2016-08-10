@@ -25,3 +25,8 @@ $container['logger'] = function(\Slim\Container $c) {
 $container['hook'] = function(\Slim\Container $c) {
     return new Hook($c);
 };
+
+// Cookies
+$container['cookies'] = function(\Slim\Container $c) {
+    return new \Slim\Http\Cookies($c->get('request')->getCookieParams());
+};
