@@ -28,26 +28,28 @@ class Response extends Meta\Base
      *
      * @var string
      */
-    protected $template = 'index.phtml';
+    protected $_template = 'index.phtml';
 
     /**
      *
      * @var array
      */
-    protected $channels = [];
+    protected $_channels = [];
 
     /**
      *
      * @var Raw
      */
-    protected $raw;
+    protected $_raw;
 
     /**
      *
      * @param Raw $raw
+     * @param Controller $controller
      */
-    public function __construct(Raw $raw) {
-        $this->raw = $raw;
+    public function __construct(Raw $raw, Controller $controller = null) {
+        $this->_raw         = $raw;
+        $this->_controller  = $controller;
     }
 
     /**
@@ -55,7 +57,7 @@ class Response extends Meta\Base
      * @return Raw
      */
     public function raw(): Raw {
-        return $this->raw;
+        return $this->_raw;
     }
 
     /**
@@ -63,7 +65,7 @@ class Response extends Meta\Base
      * @param string $template
      */
     public function setTemplate(string $template) {
-        $this->template = $template;
+        $this->_template = $template;
     }
 
     /**
@@ -71,7 +73,7 @@ class Response extends Meta\Base
      * @return string
      */
     public function getTemplate(): string {
-        return $this->template;
+        return $this->_template;
     }
 
     /**
@@ -80,7 +82,7 @@ class Response extends Meta\Base
      * @param Collection $data
      */
     public function setChannelData(string $name, Collection $data) {
-        $this->channels[$name] = $data;
+        $this->_channels[$name] = $data;
     }
 
     /**
@@ -118,7 +120,7 @@ class Response extends Meta\Base
      * @return Raw
      */
     public function regress(): Raw {
-        $response = $this->raw;
+        $response = $this->_raw;
         if ($this->_http_headers) {
             foreach ($this->_http_headers as $name => $value) {
                 $response = $response->withHeader($name, $value);
@@ -153,7 +155,7 @@ class Response extends Meta\Base
      */
     protected function makeChannelArray(): array {
         $result = [];
-        foreach ($this->channels as $name => $data) {
+        foreach ($this->_channels as $name => $data) {
             /* @var $data Collection */
             foreach ($data as $key => $row) {
                 if (is_object($row)) {

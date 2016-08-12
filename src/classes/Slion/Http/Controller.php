@@ -87,7 +87,7 @@ abstract class Controller {
     protected function makeRequest(RawRequest $raw, string $prefix = ''): Request {
         $class  = "{$prefix}Request";
         if (@class_exists($class)) {
-            $request = new $class($raw);
+            $request = new $class($raw, $this);
         } else {
             $request = $this->makeDefaultRequest($raw);
         }
@@ -101,7 +101,7 @@ abstract class Controller {
      * @return \Slion\Http\Request
      */
     protected function makeDefaultRequest(RawRequest $raw): Request {
-        return new Request($raw);
+        return new Request($raw, $this);
     }
 
     /**
@@ -116,11 +116,10 @@ abstract class Controller {
 
         $class  = "{$prefix}Response";
         if (@class_exists($class)) {
-            $response = new $class($raw);
+            $response = new $class($raw, $this);
         } else {
             $response = $this->makeDefaultResponse($raw);
         }
-        $response   = new $class($raw);
         /* @var $response Response */
         return $response;
     }
@@ -131,7 +130,7 @@ abstract class Controller {
      * @return \Slion\Http\Response
      */
     protected function makeDefaultResponse(RawResponse $raw): Response {
-        return new Response($raw);
+        return new Response($raw, $this);
     }
 
     /**

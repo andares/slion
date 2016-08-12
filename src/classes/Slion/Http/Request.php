@@ -25,14 +25,23 @@ class Request extends Meta\Base
      *
      * @var Raw
      */
-    protected $raw;
+    protected $_raw;
+
+    /**
+     *
+     * @var Controller
+     */
+    protected $_controller = null;
 
     /**
      *
      * @param Raw $raw
+     * @param Controller $controller
      */
-    public function __construct(Raw $raw) {
-        $this->raw = $raw;
+    public function __construct(Raw $raw, Controller $controller = null) {
+        $this->_raw         = $raw;
+        $this->_controller  = $controller;
+
         $this->fill($raw->getParams());
         $this->takeUploadFiles();
     }
@@ -42,7 +51,7 @@ class Request extends Meta\Base
      * @return Raw
      */
     public function raw(): Raw {
-        return $this->raw;
+        return $this->_raw;
     }
 
     /**
@@ -88,7 +97,7 @@ class Request extends Meta\Base
      *
      */
     protected function takeUploadFiles() {
-        $upload_files = $this->raw->getUploadedFiles();
+        $upload_files = $this->_raw->getUploadedFiles();
         foreach (static::$_upload_fields as $name) {
             isset($upload_files[$name]) && $this->$name = $upload_files[$name];
         }

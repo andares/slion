@@ -15,15 +15,21 @@ class ErrorResponse extends Response {
     protected static $_message_dict = 'errors';
 
     /**
+     * @var int
+     */
+    protected $_http_code    = 200;
+
+    /**
+     *
+     * @var string
+     */
+    protected $_template = 'error.phtml';
+
+    /**
      *
      * @var \Throwable
      */
     private $e;
-
-    /**
-     * @var int
-     */
-    protected $_http_code    = 200;
 
     /**
      *
