@@ -78,7 +78,7 @@ class Logger extends TracyLogger {
             $message->setExtra([
                 'ip'        => $run->environment->get('REMOTE_ADDR'),
                 'source'    => \Tracy\Helpers::getSource(),
-                'exc_file'  => $exceptionFile,
+                'exc_file'  => $exception_file,
             ]);
             $line[] = "$message";
         } else {
@@ -86,7 +86,7 @@ class Logger extends TracyLogger {
             $line[] = preg_replace('#\s*\r?\n\s*#', ' ',
                 $this->formatMessage($message));
             $line[] = ' @  ' . \Tracy\Helpers::getSource();
-            $exception_file && $line[] = ' @@  ' . $exceptionFile;
+            $exception_file && $line[] = ' @@  ' . $exception_file;
         }
 
 		return implode(' ', $line);
