@@ -7,10 +7,6 @@ namespace Slion;
  * @author andares
  */
 class Test {
-    public static function init() {
-        global $app;
-    }
-
     public static function run(callable $func, $times = 1) {
         timer();
         for ($i = 0; $i < $times; $i++) {

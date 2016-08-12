@@ -49,11 +49,13 @@ abstract class Controller {
      *
      * @param Container $container
      */
-    public function __construct(Container $container,
+    public function __construct(Container $container = null,
         RawRequest $raw_request = null,
         RawResponse $raw_response = null) {
 
-        $this->container = $container;
+        global $run;
+        /* @var $run \Slion\Run */
+        $this->container = $container ? $container : $run->container();
 
         $this->raw_request  = $raw_request  ? $raw_request  : $this->request;
         $this->raw_response = $raw_response ? $raw_response : $this->response;
@@ -142,14 +144,11 @@ abstract class Controller {
      */
     public function __call(string $name, array $arguments): Response {
         // 生成参数对象
-        $prefix     = $this->genPrefix($name);
-        $request    = $this->makeRequest($this->raw_request,    $prefix);
-        $response   = $this->makeResponse($this->raw_response,  $prefix);
-        $more_args  = $this->getMore($this->raw_request);
+        $receives = $this->getReceives($name);
 
-        dlog($request->confirm()->toLog());
+        dlog($receives[1]->confirm()->toLog());
         $this->hook->take(\Slion\HOOK_BEFORE_ACTION, $this, $name,
-            $response, $request, ...$more_args,...$arguments);
+            ...$receives, ...$arguments);
 
         // 执行业务
         $action = ucfirst($name);
@@ -157,9 +156,9 @@ abstract class Controller {
         if (!method_exists($this, $method)) {
             throw new \BadMethodCallException("action [$action] is not exist");
         }
-        $this->$method($response, $request,
-            ...$this->more_args,...$arguments);
+        $this->$method(...$receives, ...$arguments);
 
+        $response = $receives[0];
         $this->hook->take(\Slion\HOOK_BEFORE_RESPONSE, $response);
         $this->setCookieHeaders($response);
         dlog($response->confirm()->toLog());
@@ -173,6 +172,22 @@ abstract class Controller {
      */
     public function __get(string $name) {
         return $this->container->get($name);
+    }
+
+    /**
+     *
+     * @param string $action
+     * @return array
+     */
+    protected function getReceives(string $action): array {
+        $receives   = $this->getMore($this->raw_request);
+
+        $prefix     = $this->genPrefix($action);
+        $request    = $this->makeRequest($this->raw_request,    $prefix);
+        array_unshift($receives, $request);
+        $response   = $this->makeResponse($this->raw_response,  $prefix);
+        array_unshift($receives, $response);
+        return $receives;
     }
 
     /**
