@@ -6,45 +6,21 @@ $hook = $container->get('hook');
 
 // add hook
 const HOOK_BEFORE_ACTION    = 'slion:before_action';
-const HOOK_ERROR_RESPONSE   = 'slion:error_response';
+const HOOK_ABORT_CATCHED    = 'slion:abort_catched';
 const HOOK_BEFORE_RESPONSE  = 'slion:before_response';
 const HOOK_REGRESS_RESPONSE = 'slion:regress_response';
 
+$hook
+    ->add(HOOK_BEFORE_ACTION)
+    ->add(HOOK_BEFORE_RESPONSE)
+    ->add(HOOK_ABORT_CATCHED)
+    ->add(HOOK_REGRESS_RESPONSE);
 
-$hook->add(HOOK_BEFORE_ACTION, function(array $handlers,
-    Http\Controller $caller, \Slim\Container $c, string $action,
-    Http\Response $response, $request = null) {
-    foreach ($handlers as $handler) {
-        $handler($caller, $c, $action, $response, $request);
-    }
-});
-
-$hook->add(HOOK_BEFORE_RESPONSE, function(array $handlers,
-    Http\Dispatcher $caller, \Slim\Container $c, Http\Response $response) {
-    foreach ($handlers as $handler) {
-        $handler($caller, $c, $response);
-    }
-});
-
-$hook->add(HOOK_ERROR_RESPONSE, function(array $handlers,
-    Http\ErrorResponse $caller, \Slim\Container $c, \Throwable $exc) {
-    foreach ($handlers as $handler) {
-        $handler($caller, $c, $exc);
-    }
-});
-
-$hook->add(HOOK_REGRESS_RESPONSE, function(array $handlers,
-    Http\Dispatcher $caller, \Slim\Container $c, Http\Response $response) {
-    foreach ($handlers as $handler) {
-        $handler($caller, $c, $response);
-    }
-});
 
 // attach hook taker
-$hook->attach(HOOK_REGRESS_RESPONSE, function(Http\Dispatcher $caller,
-    \Slim\Container $c, Http\Response $response) {
+$hook->attach(HOOK_REGRESS_RESPONSE, function(Run $run) {
 
-    $slow_time = $c->get('slion_settings')['debug']['slow_log'];
+    $slow_time = $run->settings('debug')['slow_log'];
     if ($slow_time) {
         $timecost = (microtime(true) - \Tracy\Debugger::$time) * 1000;
         if ($timecost > $slow_time) {

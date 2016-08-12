@@ -10,54 +10,81 @@ namespace Slion;
 class Run {
     /**
      *
+     * @var string
+     */
+    private $_id;
+
+    /**
+     *
      * @var \Slim\App
      */
-    private $app = null;
+    private $_app = null;
 
     /**
      *
      * @var \Slim\Container
      */
-    private $container = null;
+    private $_container = null;
 
     /**
      *
      * @var array
      */
-    private $settings = [];
+    private $_settings = [];
 
     /**
      *
      * @var Init[]
      */
-    private $extensions;
+    private $_extensions;
 
     /**
      *
      * @var string
      */
-    private $current_extension;
+    private $_current_extension;
 
     /**
      *
      * @var array
      */
-    private $bootstrappers;
+    private $_bootstrappers;
 
     /**
      *
      * @var array
      */
-    private $skips  = [];
+    private $_skips  = [];
 
     /**
      *
      * @var []
      */
-    private static $imported = [];
+    private static $_imported = [];
 
     public function __construct() {
         $GLOBALS['run'] = $this;
+
+        $this->_id = $this->genId();
+    }
+
+    /**
+     *
+     * @return string
+     */
+    private function genId(): string {
+        $generator = new Utils\IdGenerator;
+        $generator->algo = 'fnv1a32';
+        return $generator->prepare(microtime())->hash_hmac('triss')
+            ->gmp_strval()->get();
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getId(): string {
+        return $this->_id;
     }
 
     /**
@@ -66,7 +93,16 @@ class Run {
      * @return type
      */
     public function __get(string $name) {
-        return $this->container->get($name);
+        return $this->_container->get($name);
+    }
+
+    /**
+     *
+     * @param string $name
+     * @param mixed $value
+     */
+    public function __set(string $name, $value) {
+        $this->_container[$name] = $value;
     }
 
     /**
@@ -74,7 +110,7 @@ class Run {
      * @return \Slim\App
      */
     public function app(): \Slim\App {
-        return $this->app;
+        return $this->_app;
     }
 
     /**
@@ -82,15 +118,15 @@ class Run {
      * @return \Slim\Container
      */
     public function container(): \Slim\Container {
-        return $this->container;
+        return $this->_container;
     }
 
     /**
      *
-     * @return array
+     * @return mixed
      */
-    public function settings(): array {
-        return $this->settings;
+    public function settings(string $key = null) {
+        return $key ? ($this->_settings[$key] ?? null) : $this->_settings;
     }
 
     /**
@@ -99,7 +135,7 @@ class Run {
      * @return string
      */
     public function root(string $extension_name): string {
-        return $this->extensions[$extension_name]['root'];
+        return $this->_extensions[$extension_name]['root'];
     }
 
     /**
@@ -107,12 +143,12 @@ class Run {
      */
     public function ready(array $container) {
         // 构建自身
-        $this->app          = new \Slim\App($container);
-        $this->container    = $this->app->getContainer();
-        $this->settings     = $this->container->get('slion_settings');
+        $this->_app          = new \Slim\App($container);
+        $this->_container    = $this->_app->getContainer();
+        $this->_settings     = $this->_container->get('slion_settings');
 
         // 导入全局
-        $GLOBALS['app'] = $this->app;
+        $GLOBALS['app'] = $this->_app;
 
         // 注册自动载入
         $this->registerAutoload();
@@ -125,8 +161,8 @@ class Run {
      * @return self
      */
     public function add(string $name, string $root): self {
-        $this->current_extension            = $name;
-        $this->extensions[$name]['root']    = $root;
+        $this->_current_extension            = $name;
+        $this->_extensions[$name]['root']    = $root;
         return $this;
     }
 
@@ -136,7 +172,7 @@ class Run {
      * @return self
      */
     public function select(string $name): self {
-        $this->current_extension    = $name;
+        $this->_current_extension    = $name;
         return $this;
     }
 
@@ -150,8 +186,8 @@ class Run {
      * @return \self
      */
     public function setup(int $seq, callable $boot, string $info = ''): self {
-        $this->extensions[$this->current_extension]['boots'][$seq][] = $boot;
-        $this->bootstrappers[$seq][$this->current_extension][]       = $info;
+        $this->_extensions[$this->_current_extension]['boots'][$seq][] = $boot;
+        $this->_bootstrappers[$seq][$this->_current_extension][]       = $info;
         return $this;
     }
 
@@ -160,7 +196,7 @@ class Run {
      * @return array
      */
     public function getBootstrappers() {
-        return $this->bootstrappers;
+        return $this->_bootstrappers;
     }
 
     /**
@@ -168,20 +204,20 @@ class Run {
      * @return \Slim\App
      */
     public function __invoke() {
-        ksort($this->bootstrappers);
-        foreach ($this->bootstrappers as $seq => $list) {
-            if (isset($this->skips[$seq])) {
+        ksort($this->_bootstrappers);
+        foreach ($this->_bootstrappers as $seq => $list) {
+            if (isset($this->_skips[$seq])) {
                 continue;
             }
             foreach ($list as $extension_name => $info) {
-                $extension = $this->extensions[$extension_name];
+                $extension = $this->_extensions[$extension_name];
                 foreach ($extension['boots'][$seq] as $boot) {
-                    $boot($extension['root'], $this);
+                    $boot->call($this, $extension['root']);
                 }
             }
         }
 
-        return $this->app;
+        return $this->_app;
     }
 
     /**
@@ -189,13 +225,13 @@ class Run {
      * @param int $seq
      */
     public function skip(int $seq) {
-        $this->skips[$seq] = 1;
+        $this->_skips[$seq] = 1;
     }
 
     /**
      * 注册自动载入
      */
-    public function registerAutoload() {
+    private function registerAutoload() {
         spl_autoload_register(function ($classname) {
             $classname  = \str_replace("\\", DIRECTORY_SEPARATOR, $classname);
 
@@ -217,12 +253,12 @@ class Run {
      * @param string $dir
      * @return array
      */
-    public function importLibrary(string $dir): array {
-        if (!isset(self::$imported[$dir])) {
+    private function importLibrary(string $dir): array {
+        if (!isset(self::$_imported[$dir])) {
             ini_set('include_path', $dir . PATH_SEPARATOR . ini_get('include_path'));
-            self::$imported[$dir] = 1;
+            self::$_imported[$dir] = 1;
         }
-        return self::$imported;
+        return self::$_imported;
     }
 
     /**
@@ -231,7 +267,7 @@ class Run {
      * @param array $check_list
      * @throws \RuntimeException
      */
-    public function phpIniReady(array $setup_list = [], array $check_list = []) {
+    private function phpIniReady(array $setup_list = [], array $check_list = []) {
         foreach ($setup_list as $name => $value) {
             ini_set($name, $value);
         }

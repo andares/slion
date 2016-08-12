@@ -16,10 +16,10 @@ require __DIR__ . '/vendor/autoload.php';
 /* @var $run \Slion\Run */
 $run->add('chord', __DIR__)
 
-    ->setup(70, function(string $root, Run $run) {
-        $app        = $run->app();
-        $container  = $run->container();
-        $settings   = $run->settings();
+    ->setup(70, function(string $root) {
+        $app        = $this->app();
+        $container  = $this->container();
+        $settings   = $this->settings();
 
         // 加入容器
         $container['chord'] = function ($c) {
@@ -29,7 +29,7 @@ $run->add('chord', __DIR__)
         /* @var $chord \Slion\Console */
 
         // 载入slion自带功能
-        $chord->map($run->root('slion') . "/classes/Slion", 'Slion');
+        $chord->map($this->root('slion') . "/classes/Slion", 'Slion');
         $chord->setDefaultDomain('slion');
     }, 'chord init');
 

@@ -1,9 +1,10 @@
 <?php
 namespace Slion\Http;
 
+use Slim\Http\Request as Raw;
 use Slion\Meta;
 use Slion\Pack;
-use Slion\Components\DependenciesTaker;
+use Slion\Utils\Logger\Log;
 
 
 /**
@@ -12,23 +13,61 @@ use Slion\Components\DependenciesTaker;
  * @author andares
  *
  */
-abstract class Request extends Meta implements DependenciesTaker {
+class Request extends Meta\Base
+    implements \ArrayAccess, \Serializable, \JsonSerializable {
+    use Meta\Access, Meta\Serializable, Meta\Json;
+
     protected static $_packed = [];
     protected static $_pack_format      = 'json';
     protected static $_upload_fields    = [];
 
-    public function confirm() {
+    /**
+     *
+     * @var Raw
+     */
+    protected $raw;
+
+    /**
+     *
+     * @param Raw $raw
+     */
+    public function __construct(Raw $raw) {
+        $this->raw = $raw;
+        $this->fill($raw->getParams());
+        $this->takeUploadFiles();
+    }
+
+    /**
+     *
+     * @return Raw
+     */
+    public function raw(): Raw {
+        return $this->raw;
+    }
+
+    /**
+     *
+     * @return self
+     */
+    public function confirm(): self {
         // 解包打包的参数
         foreach (static::$_packed as $name) {
             is_string($this->$name) &&
                 $this->$name = Pack::decode(static::$_pack_format, $this->$name);
         }
 
-        parent::confirm();
+        return parent::confirm();
     }
 
-    public function toArray($not_null = false) {
+    /**
+     *
+     * @param bool $not_null
+     * @return array
+     */
+    public function toArray(bool $not_null = false): array {
         $arr = parent::toArray($not_null);
+
+        // 移除upload类型字段
         if (static::$_upload_fields) {
             foreach (static::$_upload_fields as $field) {
                 unset($arr[$field]);
@@ -37,15 +76,31 @@ abstract class Request extends Meta implements DependenciesTaker {
         return $arr;
     }
 
-    public function __debugInfo() {
+    /**
+     *
+     * @return array
+     */
+    public function __debugInfo(): array {
         return $this->toArray();
     }
 
-    public function takeDependencies(\Slim\Container $container) {
-        // 拉取upload files
-        $upload_files = $container->get('dispatcher')->getRawRequest()->getUploadedFiles();
+    /**
+     *
+     */
+    protected function takeUploadFiles() {
+        $upload_files = $this->raw->getUploadedFiles();
         foreach (static::$_upload_fields as $name) {
             isset($upload_files[$name]) && $this->$name = $upload_files[$name];
         }
+    }
+
+    /**
+     *
+     * @return Log
+     */
+    public function toLog(): Log {
+        $log = new Log('receive request');
+        $log->data = $this->toArray();
+        return $log;
     }
 }

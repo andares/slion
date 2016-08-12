@@ -10,5 +10,6 @@ use Slim\Http\Response as RawResponse;
  * @author andares
  */
 interface Middleware {
-    public function __invoke(RawRequest $request, RawResponse $response, callable $next);
+    public function __invoke(RawRequest $request, RawResponse $response,
+        callable $next): RawResponse;
 }

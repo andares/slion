@@ -2,17 +2,23 @@
 namespace Slion\Http;
 
 use Slion\Meta;
-use Slion\Pack;
-use Slion\Components\DependenciesTaker;
-use Slim\Http\Response as RawResponse;
+use Slim\Http\Response as Raw;
 use Slim\Collection;
+use Slion\Utils\Logger\Log;
 
 /**
  * Http响应
  *
  * @author andares
  */
-abstract class Response extends Meta implements DependenciesTaker {
+class Response extends Meta\Base
+    implements \ArrayAccess, \Serializable, \JsonSerializable {
+    use Meta\Access, Meta\Serializable, Meta\Json;
+
+    protected static $_default = [
+        'ok'    => 1,
+    ];
+
     protected $_http_code    = 200;
 
     protected $_http_headers = [
@@ -20,9 +26,53 @@ abstract class Response extends Meta implements DependenciesTaker {
 
     /**
      *
+     * @var string
+     */
+    protected $template = 'index.phtml';
+
+    /**
+     *
      * @var array
      */
     protected $channels = [];
+
+    /**
+     *
+     * @var Raw
+     */
+    protected $raw;
+
+    /**
+     *
+     * @param Raw $raw
+     */
+    public function __construct(Raw $raw) {
+        $this->raw = $raw;
+    }
+
+    /**
+     *
+     * @return Raw
+     */
+    public function raw(): Raw {
+        return $this->raw;
+    }
+
+    /**
+     *
+     * @param string $template
+     */
+    public function setTemplate(string $template) {
+        $this->template = $template;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getTemplate(): string {
+        return $this->template;
+    }
 
     /**
      *
@@ -33,7 +83,28 @@ abstract class Response extends Meta implements DependenciesTaker {
         $this->channels[$name] = $data;
     }
 
-    public function setHeaders(array $headers = [], $reset = false) {
+    /**
+     *
+     * @param int $code
+     */
+    public function setHttpCode(int $code = 200) {
+        $this->_http_code = $code;
+    }
+
+    /**
+     *
+     * @return int
+     */
+    public function getHttpCode(): int {
+        return $this->_http_code;
+    }
+
+    /**
+     *
+     * @param array $headers
+     * @param bool $reset
+     */
+    public function setHeaders(array $headers = [], bool $reset = false) {
         $reset && $this->_http_headers = [];
 
         foreach ($headers as $name => $value) {
@@ -41,41 +112,34 @@ abstract class Response extends Meta implements DependenciesTaker {
         }
     }
 
-    public function applyHeaders(RawResponse $response) {
-        // http 头
+    /**
+     *
+     * @param Raw $response
+     * @return Raw
+     */
+    public function regress(): Raw {
+        $response = $this->raw;
         if ($this->_http_headers) {
             foreach ($this->_http_headers as $name => $value) {
                 $response = $response->withHeader($name, $value);
             }
         }
-    }
-
-    public function raiseError(\Throwable $exc, \Slim\Container $container): self {
-        return ErrorResponse::handleException($exc, $container);
+        return $response->withStatus($this->_http_code);
     }
 
     /**
      *
-     * @param RawResponse $response
-     * @return RawResponse
+     * @return array
      */
-    public function regress(RawResponse $response) {
-        return $response->withJson($this, $this->_http_code);
-    }
-
-    public function setHttpCode(int $code = 200) {
-        $this->_http_code = $code;
-    }
-
-    public function getHttpCode(): int {
-        return $this->_http_code;
-    }
-
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return $this->makeProtocol();
     }
 
-    protected function makeProtocol() {
+    /**
+     *
+     * @return array
+     */
+    protected function makeProtocol(): array {
         return [
             'result'    => $this->toArray(),
             'error'     => null,
@@ -83,7 +147,11 @@ abstract class Response extends Meta implements DependenciesTaker {
         ];
     }
 
-    protected function makeChannelArray() {
+    /**
+     *
+     * @return array
+     */
+    protected function makeChannelArray(): array {
         $result = [];
         foreach ($this->channels as $name => $data) {
             /* @var $data Collection */
@@ -105,5 +173,14 @@ abstract class Response extends Meta implements DependenciesTaker {
         return $result;
     }
 
-    public function takeDependencies(\Slim\Container $container) {}
+    /**
+     *
+     * @return Log
+     */
+    public function toLog(string $catalog = 'send response'): Log {
+        $log = new Log($catalog);
+        $log->http_code = $this->getHttpCode();
+        $log->data      = $this->makeProtocol();
+        return $log;
+    }
 }

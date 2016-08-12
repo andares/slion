@@ -2,9 +2,11 @@
 
 namespace Slion\Http;
 
-use Slim\Container;
+use Slim\App;
 use Slim\Http\Request as RawRequest;
 use Slim\Http\Response as RawResponse;
+use Slion\Abort;
+use Slion\Debugger;
 
 
 /**
@@ -15,169 +17,151 @@ use Slim\Http\Response as RawResponse;
 class Dispatcher {
     /**
      *
-     * @var Container
+     * @var App
      */
-    protected $container;
-
-    protected $space;
+    protected $app;
 
     /**
      *
-     * @var RawRequest
+     * @param App $app
      */
-    protected $request;
-
-    /**
-     *
-     * @var RawResponse
-     */
-    protected $response;
-
-    public function __construct($space, Container $container,
-        RawRequest $request, RawResponse $response) {
-        $this->container    = $container;
-        $this->space        = $space;
-        $this->request      = $request;
-        $this->response     = $response;
-
-        // 注册自己
-        $container['dispatcher'] = function($c) {
-            return $this;
-        };
-    }
-
-    public function get($name) {
-        return $this->container->get($name);
+    public function __construct(App $app) {
+        $this->app = $app;
     }
 
     /**
      *
-     * @return RawRequest
+     * @param string $module
+     * @param string $space
+     * @param array $methods
+     * @return self
      */
-    public function getRawRequest() {
-        return $this->request;
+    public function json(string $module, string $space,
+        array $methods = ['GET', 'POST', 'PUT', 'PATCH',
+            'DELETE', 'OPTIONS']): self {
+
+        $this->app->map($methods, "/$module/{controller}[/{action}[/{more:.*}]]",
+            function (RawRequest $request, RawResponse $response, array $args)
+            use ($space) {
+                $response = $this($space, $args['controller'],
+                    $args['action'] ?? '',
+                    $request, $response);
+                /* @var $response Response */
+
+                $this->get('hook')->take(\Slion\HOOK_REGRESS_RESPONSE, $response);
+                return $response->regress()->withJson($response);
+            })->setName($module);
+        return $this;
     }
 
     /**
      *
-     * @return RawResponse
+     * @todo 有待加入错误页面处理
+     *
+     * @param string $module
+     * @param string $space
+     * @param array $methods
+     * @return self
      */
-    public function getRawResponse() {
-        return $this->response;
+    public function html(string $module, string $space,
+        array $methods = ['GET', 'POST', 'PUT', 'PATCH',
+            'DELETE', 'OPTIONS']): self {
+
+        $this->app->map($methods, "/$module/{controller}[/{action}[/{more:.*}]]",
+            function (RawRequest $request, RawResponse $response, array $args)
+            use ($space) {
+                $response = $this($space, $args['controller'],
+                    $args['action'] ?? '',
+                    $request, $response);
+                /* @var $response Response */
+
+                $this->get('hook')->take(\Slion\HOOK_REGRESS_RESPONSE, $response);
+                return $this->renderer->render($response->regress(),
+                    $response->getTemplate(), $response->toArray());
+            })->setName($module);
+        return $this;
     }
 
-    public function route($controller_name, $action, array $ext = []): RawResponse {
-        $response = $this->call($controller_name, $action, $ext);
-
-        $this->get('hook')->take(\Slion\HOOK_REGRESS_RESPONSE, $this, $response);
-
-        return $this->injectCookieHeaders($response->regress($this->response));
-    }
-
-    protected function injectCookieHeaders(RawResponse $response): RawResponse {
-        return $response->withAddedHeader('Set-Cookie', implode('; ', $this->get('cookies')->toHeaders()));
-    }
-
-    protected function getControllerClass($name) {
-        return "$this->space\\Controllers\\" . ucfirst($name);
-    }
-
-    public function call($controller_name, $action, array $ext = []) {
-        // cookie创建
-        $this->container['cookies'] = function ($c) {
-            return new \Slim\Http\Cookies($this->getRawRequest()->getCookieParams());
-        };
+    /**
+     *
+     * @param string $space
+     * @param string $controller_name
+     * @param string $action
+     * @param RawRequest $raw_request
+     * @param RawResponse $raw_response
+     * @return \Slion\Http\Response
+     */
+    public function __invoke(string $space, string $controller_name, string $action,
+        RawRequest $raw_request, RawResponse $raw_response): Response {
 
         try {
-            // 生成controller
-            $class = $this->getControllerClass($controller_name);
-            if (!class_exists($class)) {
-                throw new \BadMethodCallException("controller [$controller_name] is not exists");
-            }
-            $controller = new $class($this);
+            $controller = $this->makeController($space, $controller_name,
+                $raw_request, $raw_response);
+            $response   = $controller->$action();
 
-            // 生成access对象
-            $access_object = $this->makeAccessMessage($controller, $action);
-            $response = $access_object[0];
-            /* @var $response Response */
+        } catch (Abort $abort) {
+            $response = $this->raiseError($raw_response, $abort());
 
-            if (isset($access_object[1]) && $access_object[1] instanceof Request) {
-                $request = $access_object[1];
-            } else {
-                $request = '[]';
-            }
-            assert($this->_log4request($request));
+            // 触发hook
+            $this->app->getContainer()->get('hook')
+                ->take(\Slion\HOOK_ABORT_CATCHED, $abort, $response);
 
-            $controller->$action(...$access_object, ...$ext);
-            $response->confirm();
-            $response->applyHeaders($this->response);
-
-            $this->get('hook')->take(\Slion\HOOK_BEFORE_RESPONSE, $this, $response);
-        } catch (\BadMethodCallException $exc) {
+        } catch (\BadMethodCallException $e) {
             // 处理未定义的接口
-            return $this->raiseError(
-                new \BadMethodCallException("action [$action@$controller_name] is not exists"),
-                404);
+            $response = $this->raiseError($raw_response,
+                new \BadMethodCallException(
+                    "action [$action@$controller_name] is not exists"));
+            $response->setHttpCode(404);
 
-        } catch (\Throwable $exc) {
-            if (isset($response)) {
-                /* @var $response Response */
-                $response = $response->raiseError($exc, $this->container);
-            } else {
-                $response = $this->raiseError($exc);
-            }
+        } catch (\Throwable $e) {
+            $response = $this->raiseError($raw_response, $e);
         }
 
-        assert($this->_log4response($response));
+        // 错误记录与触发debugger handle
+        if ($response instanceof ErrorResponse) {
+            dlog($response->confirm()->toLog());
+        }
         return $response;
     }
 
-    protected function raiseError(\Throwable $exc, int $code = 0) {
-        $response = ErrorResponse::handleException($exc, $this->container);
-        $code && $response->setHttpCode($code);
+    /**
+     *
+     * @param string $space
+     * @param string $name
+     * @return \Slion\Http\Controller
+     * @throws \BadMethodCallException
+     */
+    protected function makeController(string $space, string $name,
+        RawRequest $raw_request, RawResponse $raw_response): Controller {
+        $class = $this->getControllerClass($space, $name);
+        if (!class_exists($class)) {
+            throw new \BadMethodCallException("controller [$name] is not exists");
+        }
+        $controller = new $class($this->app->getContainer(),
+            $raw_request, $raw_response);
+        return $controller;
+    }
+
+    /**
+     *
+     * @param string $space
+     * @param string $name
+     * @return string
+     */
+    protected function getControllerClass(string $space, string $name): string {
+        return "$space\\Controllers\\" . ucfirst($name);
+    }
+
+    /**
+     * @todo 未对原response（如果有的话）中的channel项做继承
+     *
+     * @param RawResponse $raw
+     * @param \Throwable $e
+     * @return \Slion\Http\ErrorResponse
+     */
+    protected function raiseError(RawResponse $raw, \Throwable $e): ErrorResponse {
+        $response = new ErrorResponse($raw, $e);
         return $response;
-    }
-
-    protected function makeAccessMessage(Controller $controller, $action) {
-        $prefix = get_class($controller) . '\\' . ucfirst($action);
-
-        // 创建response
-        $response_class = "{$prefix}Response";
-        if (!class_exists($response_class)) {
-            throw new \BadMethodCallException("response of action [$action] is not exist");
-        }
-        $response   = new $response_class();
-        /* @var $response Response */
-        $response->takeDependencies($this->container);
-
-        // 创建request
-        $request_class  = "{$prefix}Request";
-        if (@class_exists($request_class)) {
-            $request = new $request_class($this->request->getParams());
-            /* @var $request Request */
-            $request->takeDependencies($this->container);
-            $request->confirm();
-        } else {
-            $request = null;
-        }
-
-        return [$response, $request];
-    }
-
-    protected function _log4request($request) {
-        $logger = $this->get('logger');
-        if ($logger) {
-            $logger->info("receive request:$request");
-        }
-        return true;
-    }
-
-    protected function _log4response($response) {
-        $logger = $this->get('logger');
-        if ($logger) {
-            $logger->info("send response(" . $response->getHttpCode() . "):$response");
-        }
-        return true;
     }
 
 }

@@ -1,6 +1,8 @@
 <?php
 namespace Slion\Http;
 
+use Slion\Debugger;
+
 /**
  *
  * @author andares
@@ -16,74 +18,112 @@ class ErrorResponse extends Response {
      *
      * @var \Throwable
      */
-    private $_exc;
-
-    protected $_error_code = 0;
+    private $e;
 
     /**
      * @var int
      */
     protected $_http_code    = 200;
 
-    protected $_message = '';
+    /**
+     *
+     * @var string
+     */
+    protected $message = '';
 
     /**
      *
-     * @param \Throwable $exc
-     * @return self
+     * @var int|string
      */
-    public static function handleException(\Throwable $exc, \Slim\Container $container) {
-        if ((is_prod() || $exc->getCode()) ||
-            !$container->get('slion_settings')['debug']['debug_in_web']) {
-            $response = new static([]);
-            $response->by($exc);
+    protected $error_code = 0;
 
-            $container->get('hook')->take(\Slion\HOOK_ERROR_RESPONSE, $response, $exc);
-            return $response->confirm();
-        }
-
-        return static::debugException($exc);
-    }
-
-    protected static function debugException(\Throwable $exc) {
-        return \Slion\Debugger::exceptionHandler($exc, true);
-    }
-
-    public function __call($name, $arguments) {
-        $this->_exc->$name(...$arguments);
-    }
-
-    public function setErrorCode($code) {
-        $this->_error_code = $code;
-    }
-
-    public function setMessage($message) {
-        $this->_message = $message;
+    public function __construct(Raw $raw, \Throwable $e) {
+        parent::__construct($raw);
+        $this->e = $e;
+        $this->by($e);
     }
 
     /**
-     * @param \Throwable $exc
+     *
+     * @param \Throwable $e
      */
-    public function by(\Throwable $exc) {
-        $this->_exc = $exc;
+    protected function by(\Throwable $e) {
+        $this->error_code  = $e->getCode();
 
-        $this->_error_code  = $exc->getCode();
-        $message = \tr(static::$_message_dict, $this->_error_code);
-        if (!is_prod() && $this->_error_code === 0) {
-            $this->_message = $exc->getMessage();
+        // 生产环境隐去原生错误消息
+        if (!is_prod() && $this->error_code === 0) {
+            $this->message = $e->getMessage();
         } else {
-            $this->_message = ($message === $this->_error_code) ? $exc->getMessage() : $message;
+            $message = $this->translateMessage($this->error_code);
+            $this->message = ($message === $this->error_code) ?
+                $e->getMessage() : $message;
         }
     }
 
-    protected function makeProtocol() {
+    /**
+     *
+     * @param string|int $key
+     * @return string
+     */
+    protected function translateMessage($key): string {
+        return \tr(static::$_message_dict, $key);
+    }
+
+    /**
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call(string $name, array $arguments) {
+        return $this->e->$name(...$arguments);
+    }
+
+    /**
+     *
+     * @param int|string $code
+     */
+    public function setErrorCode($code) {
+        $this->error_code = $code;
+    }
+
+    /**
+     *
+     * @param string $message
+     */
+    public function setMessage(string $message) {
+        $this->message = $message;
+    }
+
+    /**
+     *
+     * @param type $not_null
+     */
+    public function toArray($not_null = false): array {
+        $error = [
+            'message'   => $this->message,
+            'code'      => $this->error_code,
+            'data'      => parent::toArray($not_null),
+        ];
+    }
+
+    /**
+     *
+     * @return self
+     */
+    public function confirm(): self {
+        Debugger::exceptionHandler($this->e);
+        return parent::confirm();
+    }
+
+    /**
+     *
+     * @return array
+     */
+    protected function makeProtocol(): array {
         return [
             'result'    => null,
-            'error'     => [
-                'message'   => $this->_message,
-                'code'      => $this->_error_code,
-                'data'      => $this->toArray(),
-            ],
+            'error'     => $this->toArray(),
             'channels'  => [],
         ];
     }

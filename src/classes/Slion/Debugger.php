@@ -9,30 +9,60 @@ use Tracy\Debugger as TracyDebugger;
  * @author andares
  */
 class Debugger {
-    public static function errorHandler(int $severity, string $message, string $file, int $line, $context) {
+    public static $debug_in_web = false;
+
+    /**
+     *
+     * @param int $severity
+     * @param string $message
+     * @param string $file
+     * @param int $line
+     * @param string $context
+     * @throws \ErrorException
+     */
+    public static function errorHandler(int $severity, string $message,
+        string $file, int $line, $context) {
+
         $exc        = new \ErrorException($message, 0, $severity, $file, $line);
         $exc->context = $context;
         throw $exc;
     }
 
-    public static function exceptionHandler(\Throwable $throwed, bool $exit = true) {
+    /**
+     *
+     * @param \Error $throwed
+     * @param bool $exit
+     */
+    public static function exceptionHandler(\Throwable $throwed,
+        bool $exit = true) {
+
         if ($throwed instanceof \ErrorException) {
             /* @var $throwed \ErrorException|\Error */
             $severity = $throwed->getSeverity();
-            $priority = (($severity & E_NOTICE) || ($severity & E_WARNING)) ? 'warning' : 'error';
-            self::log($throwed, $priority);
+            $priority = (($severity & E_NOTICE) || ($severity & E_WARNING)) ?
+                'warning' : 'error';
         } elseif ($throwed instanceof \Error) {
-            self::log($throwed, 'error');
+            $priority = 'error';
         } elseif ($throwed instanceof \Exception) {
-            self::log($throwed, 'exception');
+            $priority = 'exception';
         } else {
-            self::log($throwed);
+            $priority = 'warning';
         }
+        self::log($throwed, $priority);
 
-        return TracyDebugger::exceptionHandler($throwed, $exit);
+        // 是否使用tracy debug handler
+        if (is_prod() || $throwed->getCode() || !self::$debug_in_web) {
+            return;
+        }
+        TracyDebugger::exceptionHandler($throwed, $exit);
     }
 
-    private static function log($message, $priority = 'warning') {
+    /**
+     *
+     * @param mixed $message
+     * @param string $priority
+     */
+    private static function log($message, string $priority = 'warning') {
         $logger = TracyDebugger::getLogger();
         $logger($message, $priority);
     }

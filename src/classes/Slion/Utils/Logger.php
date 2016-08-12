@@ -10,23 +10,44 @@ use Tracy\Logger as TracyLogger;
  * @author andares
  */
 class Logger extends TracyLogger {
+    /**
+     *
+     * @var bool
+     */
     public $enableBlueScreen = false;
 
-    protected function mkdir($directory) {
+    /**
+     *
+     * @param string $directory
+     */
+    protected function mkdir(string $directory) {
         if (!file_exists($directory)) {
             mkdir($directory, 0777, true);
         }
     }
 
+    /**
+     *
+     * @param string $dir
+     */
     public function setDirectory(string $dir) {
         $this->directory = $dir;
     }
 
+    /**
+     *
+     * @param string $email
+     */
     public function setEmail(string $email) {
         $this->email = $email;
     }
 
-    public function __invoke($object, $priority = 'debug') {
+    /**
+     *
+     * @param mixed $object
+     * @param string $priority
+     */
+    public function __invoke($object, string $priority = 'debug') {
         // 增加对数组的支持
         if (is_array($object)) {
             $object = Pack::encode('json', $object);
@@ -34,7 +55,12 @@ class Logger extends TracyLogger {
         $this->log($object, $priority);
     }
 
-    public function __call($name, $arguments) {
+    /**
+     *
+     * @param string $name
+     * @param array $arguments
+     */
+    public function __call(string $name, array $arguments) {
         $this($arguments[0] ?? '', $name);
     }
 
@@ -42,29 +68,84 @@ class Logger extends TracyLogger {
 	 * @param  string|\Exception|\Throwable
 	 * @return string
 	 */
-	protected function formatLogLine($message, $exceptionFile = NULL)
+	protected function formatLogLine($message, $exception_file = NULL)
 	{
-        $line = [
-			@date('[Y-m-d H:i:s]'),
-			preg_replace('#\s*\r?\n\s*#', ' ', $this->formatMessage($message)),
-			' @  ' . \Tracy\Helpers::getSource(),
-			$exceptionFile ? ' @@  ' . basename($exceptionFile) : NULL,
-		];
-		if ($message instanceof \Exception || $message instanceof \Throwable) {
-            $line[] = "\n" . $message->getTraceAsString();
+        global $run;
+        /* @var $run \Slion\Run */
+        $line = [@date('[Y-m-d H:i:s]')];
+
+        if ($message instanceof Logger\Log) {
+            $message->setExtra([
+                'ip'        => $run->environment->get('REMOTE_ADDR'),
+                'source'    => \Tracy\Helpers::getSource(),
+                'exc_file'  => $exceptionFile,
+            ]);
+            $line[] = "$message";
+        } else {
+            $line[] = "RID:" . $run->getId();
+            $line[] = preg_replace('#\s*\r?\n\s*#', ' ',
+                $this->formatMessage($message));
+            $line[] = ' @  ' . \Tracy\Helpers::getSource();
+            $exception_file && $line[] = ' @@  ' . $exceptionFile;
         }
+
 		return implode(' ', $line);
 	}
 
     /**
-     * 强烈建议不要开启 enableBlueScreen ，现有的功能已经足够调试。
-     * 开启之后，需要同时关闭严格模式，否则当出现错误连续抛相同违例时，会发生违例 bluescreen 因文件名相同而报错的问题。
      *
-     * @param type $exception
-     * @param type $file
-     * @return type
+     * @param \Throwable $exception
+     * @return string
      */
-	protected function logException($exception, $file = NULL) {
-        return $this->enableBlueScreen ? parent::logException($exception, $file) : '';
+	public function getExceptionFile($exception): string
+	{
+		$hash = substr(md5(preg_replace('~(Resource id #)\d+~', '$1', $exception)),
+            0, 10);
+		$dir  = strtr($this->directory . '/', '\\/',
+            DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR) .
+            DIRECTORY_SEPARATOR . @date('Y-m-d');
+        if (!file_exists($dir)) {
+            mkdir($dir, 0777, true);
+        }
+		return $dir . DIRECTORY_SEPARATOR . "exception--$hash.txt";
 	}
+
+    /**
+     *
+     * @param \Throwable $e
+     * @param string $file
+     * @return string
+     */
+	protected function logException($e, $file = null): string {
+		$file = $file ?: $this->getExceptionFile($e);
+        if (file_exists($file)) {
+            return $file;
+        }
+
+        $content = '';
+        file_put_contents($file, $this->makeExceptionLogContent($content, $e));
+		return $file;
+	}
+
+    /**
+     *
+     * @param string $content
+     * @param \Throwable $e
+     * @return string
+     */
+    protected function makeExceptionLogContent(string $content,
+        \Throwable $e):string {
+
+        $content .= '- message: ' . $e->getMessage() . "\n" .
+            '- code: ' . $e->getCode() . "\n" .
+            '- file: ' . $e->getFile() . "\n" .
+            '- line: ' . $e->getLine() . "\n" .
+            "\n" .
+            $e->getTraceAsString() . "\n\n+++++\n\n";
+        $previous = $e->getPrevious();
+        if ($previous) {
+            return $this->makeExceptionLogContent($content, $e);
+        }
+        return $content;
+    }
 }

@@ -1,55 +1,190 @@
 <?php
 namespace Slion\Http;
-
+use Slim\Container;
+use Slim\Http\{
+    Cookies,
+    Request as RawRequest,
+    Response as RawResponse};
+use Slion\Utils;
 
 /**
  * 默认控制器
  *
  * @author andares
  *
- * @property \Slion\Utils\Config $config
- * @property \Slion\Utils\Dict $dict
- * @property \Slion\Utils\Logger $logger
+ * @property Utils\Config $config
+ * @property Utils\Dict $dict
+ * @property Utils\Logger $logger
+ * @property \Slion\Hook $hook
+ * @property Cookies $cookies
  */
 abstract class Controller {
+//
+
     /**
      *
-     * @var Dispatcher
+     * @var Container
      */
-    protected $dispatcher;
+    protected $container;
 
-    public function __construct(Dispatcher $dispatcher = null) {
-        $this->dispatcher = $dispatcher;
+    /**
+     *
+     * @var RawRequest
+     */
+    protected $raw_request;
+
+    /**
+     *
+     * @var RawResponse
+     */
+    protected $raw_response;
+
+    /**
+     *
+     * @var array
+     */
+    protected $more_args = [];
+
+    /**
+     *
+     * @param Container $container
+     */
+    public function __construct(Container $container,
+        RawRequest $raw_request = null,
+        RawResponse $raw_response = null) {
+
+        $this->container = $container;
+
+        $this->raw_request  = $raw_request  ? $raw_request  : $this->request;
+        $this->raw_response = $raw_response ? $raw_response : $this->response;
     }
 
-    public function __call($name, array $arguments) {
-        $this->hook && $this->hook->take(\Slion\HOOK_BEFORE_ACTION, $this, $name, ...$arguments);
+    /**
+     *
+     * @param RawRequest $request
+     * @return array
+     */
+    protected function getMore(RawRequest $request): array {
+        $more = $request->getAttribute('more');
+        return $more ? explode('/', $more) : [];
+    }
 
+    /**
+     *
+     * @param string $action
+     * @return string
+     */
+    protected function genPrefix(string $action): string {
+        return static::$class . '\\' . ucfirst($action);
+    }
+
+    /**
+     *
+     * @param RawRequest $raw
+     * @param string $prefix
+     * @return \Slion\Http\Request
+     */
+    protected function makeRequest(RawRequest $raw, string $prefix = ''): Request {
+        $class  = "{$prefix}Request";
+        if (@class_exists($class)) {
+            $request = new $class($raw);
+        } else {
+            $request = $this->makeDefaultRequest($raw);
+        }
+        /* @var $request Request */
+        return $request;
+    }
+
+    /**
+     *
+     * @param RawRequest $raw
+     * @return \Slion\Http\Request
+     */
+    protected function makeDefaultRequest(RawRequest $raw): Request {
+        return new Request($raw);
+    }
+
+    /**
+     *
+     * @param RawResponse $raw
+     * @param string $prefix
+     * @return \Slion\Http\Response
+     * @throws \BadMethodCallException
+     */
+    protected function makeResponse(RawResponse $raw,
+        string $prefix = ''): Response {
+
+        $class  = "{$prefix}Response";
+        if (@class_exists($class)) {
+            $response = new $class($raw);
+        } else {
+            $response = $this->makeDefaultResponse($raw);
+        }
+        $response   = new $class($raw);
+        /* @var $response Response */
+        return $response;
+    }
+
+    /**
+     *
+     * @param RawResponse $raw
+     * @return \Slion\Http\Response
+     */
+    protected function makeDefaultResponse(RawResponse $raw): Response {
+        return new Response($raw);
+    }
+
+    /**
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return \Slion\Http\Response
+     * @throws \BadMethodCallException
+     */
+    public function __call(string $name, array $arguments): Response {
+        // 生成参数对象
+        $prefix     = $this->genPrefix($name);
+        $request    = $this->makeRequest($this->raw_request,    $prefix);
+        $response   = $this->makeResponse($this->raw_response,  $prefix);
+        $more_args  = $this->getMore($this->raw_request);
+
+        dlog($request->confirm()->toLog());
+        $this->hook->take(\Slion\HOOK_BEFORE_ACTION, $this, $name,
+            $response, $request, ...$more_args,...$arguments);
+
+        // 执行业务
         $action = ucfirst($name);
         $method = "action$action";
-
         if (!method_exists($this, $method)) {
             throw new \BadMethodCallException("action [$action] is not exist");
         }
+        $this->$method($response, $request,
+            ...$this->more_args,...$arguments);
 
-        $this->$method(...$arguments);
+        $this->hook->take(\Slion\HOOK_BEFORE_RESPONSE, $response);
+        $this->setCookieHeaders($response);
+        dlog($response->confirm()->toLog());
+        return $response;
     }
 
-    public function call($controller_name, $action, array $ext = []) {
-        if (!$this->dispatcher) {
-            return null;
+    /**
+     *
+     * @param string $name
+     * @return mixed
+     */
+    public function __get(string $name) {
+        return $this->container->get($name);
+    }
+
+    /**
+     *
+     */
+    protected function setCookieHeaders(Response $response) {
+        $set_cookies = $this->cookies->toHeaders();
+        if ($set_cookies) {
+            $response->setHeaders([
+                'Set-Cookie'    => implode('; ', $set_cookies),
+            ]);
         }
-        return $this->dispatcher->call($controller_name, $action, $ext);
-    }
-
-    public function getUploadedFiles() {
-        if ($this->dispatcher) {
-            return $this->dispatcher->getRawRequest()->getUploadedFiles();
-        }
-        return [];
-    }
-
-    public function __get($name) {
-        return $this->dispatcher ? $this->dispatcher->get($name) : null;
     }
 }

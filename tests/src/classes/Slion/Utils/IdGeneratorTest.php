@@ -34,10 +34,19 @@ class IdGeneratorTest extends \PHPUnit_Framework_TestCase {
      * @todo   Implement testPrepare().
      */
     public function testPrepare() {
+        du(hash_algos());
+
         $result = Test::run(function() {
             return $this->object->prepare('ddddd')->hash_hmac(microtime(), true)
                 ->base64()->get();
         });
+        du($result);
+
+        $result = Test::run(function() {
+        $this->object->algo = 'fnv164';
+            return $this->object->prepare(microtime())->hash_hmac('acbde')
+                ->gmp_strval()->get();
+        }, 1);
         du($result);
 
         $result = Test::run(function() {
