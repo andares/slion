@@ -103,7 +103,7 @@ class Logger extends TracyLogger {
             0, 10);
 		$dir  = strtr($this->directory . '/', '\\/',
             DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR) .
-            DIRECTORY_SEPARATOR . @date('Y-m-d');
+            @date('Y-m-d');
         if (!file_exists($dir)) {
             mkdir($dir, 0777, true);
         }
