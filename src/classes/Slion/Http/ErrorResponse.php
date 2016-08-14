@@ -105,7 +105,7 @@ class ErrorResponse extends Response {
      *
      * @param type $not_null
      */
-    public function toArray($not_null = false): array {
+    public function toArray(bool $not_null = false): array {
         $error = [
             'message'   => $this->message,
             'code'      => $this->error_code,
