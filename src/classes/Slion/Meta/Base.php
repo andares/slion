@@ -75,7 +75,7 @@ abstract class Base implements \IteratorAggregate {
      * @param bool $not_null
      * @return array
      */
-    public function toArray($not_null = false) {
+    public function toArray($not_null = false): array {
         $arr = [];
         foreach ($this->getDefault() as $name => $default) {
             if (isset($this->$name)) {

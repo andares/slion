@@ -233,11 +233,12 @@ class Run {
      */
     private function registerAutoload() {
         spl_autoload_register(function ($classname) {
-            $classname  = \str_replace("\\", DIRECTORY_SEPARATOR, $classname);
-
             try {
-                include "$classname.php";
+                include \str_replace("\\", DIRECTORY_SEPARATOR, $classname) . ".php";
             } catch (\Throwable $exc) {
+                error_log($exc->getMessage());
+                error_log($exc->getCode());
+                error_log($exc->getTraceAsString());
                 return false;
             }
             if (class_exists($classname) || interface_exists($classname) ||
