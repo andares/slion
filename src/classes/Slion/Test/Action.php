@@ -44,10 +44,7 @@ class Action {
      */
     public function request(array $data): self {
         $modifier = function() use ($data) {
-            $request = $this->raw_request;
-            /* @var $request RawRequest */
-            $request->withQueryParams($data);
-            $this->raw_request = $request;
+            $this->raw_request = $this->raw_request->withQueryParams($data);
         };
         $modifier->call($this->controller);
 
