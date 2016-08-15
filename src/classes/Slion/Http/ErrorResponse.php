@@ -6,6 +6,7 @@ use Slim\Http\{
     Response as Raw,
     Request as RawRequest
 };
+use Slion\Utils\Logger\Log;
 
 /**
  *
