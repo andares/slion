@@ -190,7 +190,7 @@ class Response extends Meta\Base
      */
     public function toLog(string $catalog = 'send response'): Log {
         $log = new Log($catalog);
-        $log->data      = $this->makeProtocol();
+        $log->response      = $this->makeProtocol();
         $log->setExtra([
             'http_code' => $this->getHttpCode(),
         ]);

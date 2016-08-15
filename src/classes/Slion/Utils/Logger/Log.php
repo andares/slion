@@ -52,7 +52,7 @@ class Log {
         /* @var $run \Slion\Run */
         $id = $this->id ? $this->id : $run->getId();
         $this->date && $base['date'] = $this->date;
-        $base['id']  = $this->id;
+        $base['id']   = $id;
         $base['name'] = $this->name;
 
         $output = [

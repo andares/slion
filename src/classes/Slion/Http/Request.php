@@ -112,7 +112,7 @@ class Request extends Meta\Base
      */
     public function toLog(): Log {
         $log = new Log('receive request');
-        $log->data = $this->toArray();
+        $log->request = $this->toArray();
         return $log;
     }
 }
