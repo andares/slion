@@ -45,6 +45,7 @@ class RequestId implements Middleware {
         $generator->algo = $this->algo;
         $id = $generator->prepare(microtime())->hash_hmac($this->secret)
             ->gmp_strval()->get();
+        $run->request_id = $id;
         $response = $next($request->withAttribute('request_id', $id), $response);
         return $response;
     }

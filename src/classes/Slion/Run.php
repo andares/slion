@@ -93,7 +93,7 @@ class Run {
      * @return type
      */
     public function __get(string $name) {
-        return $this->_container->get($name);
+        return $this->_container->has($name) ? $this->_container->get($name) : null;
     }
 
     /**
