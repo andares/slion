@@ -29,6 +29,11 @@ class Log {
         return $this->id;
     }
 
+    public function setExcFile(string $file): self {
+        $this->extra['exc_file'] = $file;
+        return $this;
+    }
+
     public function __set(string $name, $value) {
         $this->lines[$name] = $value;
     }

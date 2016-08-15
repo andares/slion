@@ -46,13 +46,14 @@ class Logger extends TracyLogger {
      *
      * @param mixed $object
      * @param string $priority
+     * @return string|null
      */
     public function __invoke($object, string $priority = 'debug') {
         // 增加对数组的支持
         if (is_array($object)) {
             $object = Pack::encode('json', $object);
         }
-        $this->log($object, $priority);
+        return $this->log($object, $priority);
     }
 
     /**
@@ -78,7 +79,6 @@ class Logger extends TracyLogger {
             $message->setExtra([
                 'ip'        => $run->environment->get('REMOTE_ADDR'),
                 'source'    => \Tracy\Helpers::getSource(),
-                'exc_file'  => $exception_file,
             ]);
             $line[] = "$message";
         } else {

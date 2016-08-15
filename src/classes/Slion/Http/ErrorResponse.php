@@ -50,6 +50,12 @@ class ErrorResponse extends Response {
      */
     protected $error_code = 0;
 
+    /**
+     *
+     * @var string|null
+     */
+    protected $exc_file = null;
+
     public function __construct(Raw $raw, RawRequest $request, \Throwable $e) {
         parent::__construct($raw, $request);
         $this->e = $e;
@@ -126,7 +132,7 @@ class ErrorResponse extends Response {
      * @return self
      */
     public function confirm(): self {
-        Debugger::exceptionHandler($this->e);
+        $this->exc_file = Debugger::exceptionHandler($this->e);
         return parent::confirm();
     }
 
@@ -140,6 +146,10 @@ class ErrorResponse extends Response {
             'error'     => $this->toArray(),
             'channels'  => [],
         ];
+    }
+
+    public function toLog(string $catalog = 'send response'): Log {
+        return parent::toLog($catalog)->setExcFile($this->exc_file);
     }
 
 }

@@ -32,6 +32,7 @@ class Debugger {
      *
      * @param \Error $throwed
      * @param bool $exit
+     * @return string|null exception file path
      */
     public static function exceptionHandler(\Throwable $throwed,
         bool $exit = true) {
@@ -48,11 +49,11 @@ class Debugger {
         } else {
             $priority = 'warning';
         }
-        self::log($throwed, $priority);
+        $file = self::log($throwed, $priority);
 
         // 是否使用tracy debug handler
         if (is_prod() || $throwed->getCode() || !self::$debug_in_web) {
-            return;
+            return $file;
         }
         TracyDebugger::exceptionHandler($throwed, $exit);
     }
@@ -61,10 +62,11 @@ class Debugger {
      *
      * @param mixed $message
      * @param string $priority
+     * @return string|null exception file path
      */
     private static function log($message, string $priority = 'warning') {
         $logger = TracyDebugger::getLogger();
-        $logger($message, $priority);
+        return $logger($message, $priority);
     }
 
 }
