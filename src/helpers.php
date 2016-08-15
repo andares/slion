@@ -105,7 +105,7 @@ if (!function_exists('lg')) {
 
 if (!function_exists('dlog')) {
     function dlog($message, $priority = 'debug') {
-        log($message, $priority);
+        lg($message, $priority);
     }
 }
 
