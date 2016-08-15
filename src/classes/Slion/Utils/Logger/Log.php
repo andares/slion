@@ -13,7 +13,7 @@ ip 版本 渠道号 用户id 接口 参数 返回错误码 时间 耗时
 class Log {
     protected $id = '';
     protected $name;
-    protected $lines = [];
+    protected $body = [];
     protected $extra = [];
     protected $date  = '';
 
@@ -35,11 +35,11 @@ class Log {
     }
 
     public function __set(string $name, $value) {
-        $this->lines[$name] = $value;
+        $this->body[$name] = $value;
     }
 
     public function __get(string $name) {
-        return $this->lines[$name];
+        return $this->body[$name];
     }
 
     public function setExtra(array $extra_info): self {
@@ -49,6 +49,11 @@ class Log {
 
     public function setDate(string $date): self {
         $this->date = $date;
+        return $this;
+    }
+
+    public function setBody(array $body): self {
+        $this->body[] = $body;
         return $this;
     }
 
@@ -62,7 +67,7 @@ class Log {
 
         $output = [
             '_' => $base,
-            '#' => $this->lines,
+            '#' => $this->body,
             '@' => $this->extra,
         ];
         return $output;
