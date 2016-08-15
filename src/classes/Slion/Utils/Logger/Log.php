@@ -15,6 +15,7 @@ class Log {
     protected $name;
     protected $lines = [];
     protected $extra = [];
+    protected $date  = '';
 
     public function __construct(string $name) {
         $this->name     = $name;
@@ -36,25 +37,26 @@ class Log {
         return $this->line[$name];
     }
 
-    public function setExtra(array $extra_info) {
+    public function setExtra(array $extra_info): self {
         $this->extra = array_merge($this->extra, $extra_info);
+        return $this;
     }
 
-    public function getDate() {
-        return date($this->date_formate);
+    public function setDate(string $date): self {
+        $this->date = $date;
+        return $this;
     }
 
-    protected function makeOutput(string $date) {
+    protected function makeOutput() {
         global $run;
         /* @var $run \Slion\Run */
         $id = $this->id ? $this->id : $run->getId();
+        $this->date && $base['date'] = $this->date;
+        $base['id']  = $this->$id;
+        $base['name'] = $this->catalog;
 
         $output = [
-            '_' => [
-                'id'    => $id,
-                'date'  => $date,
-                'name'  => $this->catalog,
-            ],
+            '_' => $base,
             '#' => $this->lines,
             '@' => $this->extra,
         ];
