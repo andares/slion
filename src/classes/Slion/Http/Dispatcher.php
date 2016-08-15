@@ -32,19 +32,19 @@ class Dispatcher {
     /**
      *
      * @param string $module
-     * @param string $space
+     * @param string $pattern
      * @param array $methods
      * @return self
      */
-    public function json(string $module, string $space,
+    public function json(string $module, string $pattern,
         array $methods = ['GET', 'POST', 'PUT', 'PATCH',
             'DELETE', 'OPTIONS']): self {
 
         $dispatcher = $this;
         $this->app->map($methods, "/$module/{controller}[/{action}[/{more:.*}]]",
             function (RawRequest $request, RawResponse $response, array $args)
-            use ($space, $dispatcher) {
-                $response = $dispatcher($space, $args['controller'],
+            use ($pattern, $dispatcher) {
+                $response = $dispatcher($pattern, $args['controller'],
                     $args['action'] ?? '',
                     $request, $response);
                 /* @var $response Response */
@@ -60,19 +60,19 @@ class Dispatcher {
      * @todo 有待加入错误页面处理
      *
      * @param string $module
-     * @param string $space
+     * @param string $pattern
      * @param array $methods
      * @return self
      */
-    public function html(string $module, string $space,
+    public function html(string $module, string $pattern,
         array $methods = ['GET', 'POST', 'PUT', 'PATCH',
             'DELETE', 'OPTIONS']): self {
 
         $dispatcher = $this;
         $this->app->map($methods, "/$module/{controller}[/{action}[/{more:.*}]]",
             function (RawRequest $request, RawResponse $response, array $args)
-            use ($space, $dispatcher) {
-                $response = $dispatcher($space, $args['controller'],
+            use ($pattern, $dispatcher) {
+                $response = $dispatcher($pattern, $args['controller'],
                     $args['action'] ?? '',
                     $request, $response);
                 /* @var $response Response */
@@ -86,18 +86,18 @@ class Dispatcher {
 
     /**
      *
-     * @param string $space
+     * @param string $pattern
      * @param string $controller_name
      * @param string $action
      * @param RawRequest $raw_request
      * @param RawResponse $raw_response
      * @return \Slion\Http\Response
      */
-    public function __invoke(string $space, string $controller_name, string $action,
+    public function __invoke(string $pattern, string $controller_name, string $action,
         RawRequest $raw_request, RawResponse $raw_response): Response {
 
         try {
-            $controller = $this->makeController($space, $controller_name,
+            $controller = $this->makeController($pattern, $controller_name,
                 $raw_request, $raw_response);
             $response   = $controller->$action();
 
@@ -128,14 +128,14 @@ class Dispatcher {
 
     /**
      *
-     * @param string $space
+     * @param string $pattern
      * @param string $name
      * @return \Slion\Http\Controller
      * @throws \BadMethodCallException
      */
-    protected function makeController(string $space, string $name,
+    protected function makeController(string $pattern, string $name,
         RawRequest $raw_request, RawResponse $raw_response): Controller {
-        $class = $this->getControllerClass($space, $name);
+        $class = $this->getControllerClass($pattern, $name);
         if (!class_exists($class)) {
             throw new \BadMethodCallException("controller [$name] is not exists");
         }
@@ -146,12 +146,12 @@ class Dispatcher {
 
     /**
      *
-     * @param string $space
+     * @param string $pattern
      * @param string $name
      * @return string
      */
-    protected function getControllerClass(string $space, string $name): string {
-        return "$space\\Controllers\\" . ucfirst($name);
+    protected function getControllerClass(string $pattern, string $name): string {
+        return str_replace('%c%', ucfirst($name), $pattern);
     }
 
     /**
