@@ -44,6 +44,12 @@ class Response extends Meta\Base
 
     /**
      *
+     * @var Controller
+     */
+    protected $_controller = null;
+
+    /**
+     *
      * @param Raw $raw
      * @param Controller $controller
      */
