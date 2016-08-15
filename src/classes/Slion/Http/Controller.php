@@ -82,16 +82,15 @@ abstract class Controller {
 
     /**
      *
-     * @param RawRequest $raw
      * @param string $prefix
      * @return \Slion\Http\Request
      */
-    protected function makeRequest(RawRequest $raw, string $prefix = ''): Request {
+    protected function makeRequest(string $prefix = ''): Request {
         $class  = "{$prefix}Request";
         if (@class_exists($class)) {
-            $request = new $class($raw, $this);
+            $request = new $class($this->raw_request, $this->raw_response);
         } else {
-            $request = $this->makeDefaultRequest($raw);
+            $request = $this->makeDefaultRequest();
         }
         /* @var $request Request */
         return $request;
@@ -99,28 +98,25 @@ abstract class Controller {
 
     /**
      *
-     * @param RawRequest $raw
      * @return \Slion\Http\Request
      */
-    protected function makeDefaultRequest(RawRequest $raw): Request {
-        return new Request($raw, $this);
+    protected function makeDefaultRequest(): Request {
+        return new Request($this->raw_request, $this->raw_response);
     }
 
     /**
      *
-     * @param RawResponse $raw
      * @param string $prefix
      * @return \Slion\Http\Response
      * @throws \BadMethodCallException
      */
-    protected function makeResponse(RawResponse $raw,
-        string $prefix = ''): Response {
+    protected function makeResponse(string $prefix = ''): Response {
 
         $class  = "{$prefix}Response";
         if (@class_exists($class)) {
-            $response = new $class($raw, $this);
+            $response = new $class($this->raw_response, $this->raw_request);
         } else {
-            $response = $this->makeDefaultResponse($raw);
+            $response = $this->makeDefaultResponse();
         }
         /* @var $response Response */
         return $response;
@@ -128,11 +124,10 @@ abstract class Controller {
 
     /**
      *
-     * @param RawResponse $raw
      * @return \Slion\Http\Response
      */
-    protected function makeDefaultResponse(RawResponse $raw): Response {
-        return new Response($raw, $this);
+    protected function makeDefaultResponse(): Response {
+        return new Response($this->raw_response, $this->raw_request);
     }
 
     /**
@@ -183,9 +178,9 @@ abstract class Controller {
         $receives   = $this->getMore($this->raw_request);
 
         $prefix     = $this->genPrefix($action);
-        $request    = $this->makeRequest($this->raw_request,    $prefix);
+        $request    = $this->makeRequest($prefix);
         array_unshift($receives, $request);
-        $response   = $this->makeResponse($this->raw_response,  $prefix);
+        $response   = $this->makeResponse($prefix);
         array_unshift($receives, $response);
         return $receives;
     }
