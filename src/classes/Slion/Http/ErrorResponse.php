@@ -112,6 +112,7 @@ class ErrorResponse extends Response {
             'code'      => $this->error_code,
             'data'      => parent::toArray($not_null),
         ];
+        return $error;
     }
 
     /**
