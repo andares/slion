@@ -40,10 +40,11 @@ class Dispatcher {
         array $methods = ['GET', 'POST', 'PUT', 'PATCH',
             'DELETE', 'OPTIONS']): self {
 
+        $dispatcher = $this;
         $this->app->map($methods, "/$module/{controller}[/{action}[/{more:.*}]]",
             function (RawRequest $request, RawResponse $response, array $args)
-            use ($space) {
-                $response = $this->call($space, $args['controller'],
+            use ($space, $dispatcher) {
+                $response = $dispatcher($space, $args['controller'],
                     $args['action'] ?? '',
                     $request, $response);
                 /* @var $response Response */
@@ -67,10 +68,11 @@ class Dispatcher {
         array $methods = ['GET', 'POST', 'PUT', 'PATCH',
             'DELETE', 'OPTIONS']): self {
 
+        $dispatcher = $this;
         $this->app->map($methods, "/$module/{controller}[/{action}[/{more:.*}]]",
             function (RawRequest $request, RawResponse $response, array $args)
-            use ($space) {
-                $response = $this->call($space, $args['controller'],
+            use ($space, $dispatcher) {
+                $response = $dispatcher($space, $args['controller'],
                     $args['action'] ?? '',
                     $request, $response);
                 /* @var $response Response */
@@ -91,7 +93,7 @@ class Dispatcher {
      * @param RawResponse $raw_response
      * @return \Slion\Http\Response
      */
-    public function call(string $space, string $controller_name, string $action,
+    public function __invoke(string $space, string $controller_name, string $action,
         RawRequest $raw_request, RawResponse $raw_response): Response {
 
         try {
