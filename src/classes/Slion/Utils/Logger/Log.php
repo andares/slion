@@ -53,7 +53,7 @@ class Log {
         $id = $this->id ? $this->id : $run->getId();
         $this->date && $base['date'] = $this->date;
         $base['id']  = $this->id;
-        $base['name'] = $this->catalog;
+        $base['name'] = $this->name;
 
         $output = [
             '_' => $base,
