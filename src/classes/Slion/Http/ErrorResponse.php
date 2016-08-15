@@ -12,6 +12,9 @@ use Slim\Http\{
  * @author andares
  */
 class ErrorResponse extends Response {
+    protected static $_default = [
+    ];
+
     /**
      * 错误词典名
      * @var string
