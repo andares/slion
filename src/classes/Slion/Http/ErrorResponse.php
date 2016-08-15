@@ -2,6 +2,7 @@
 namespace Slion\Http;
 
 use Slion\Debugger;
+use Slim\Http\Response as Raw;
 
 /**
  *
