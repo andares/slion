@@ -113,6 +113,11 @@ class Request extends Meta\Base
     public function toLog(): Log {
         $log = new Log('receive request');
         $log->request = $this->toArray();
+
+        $id = $this->raw()->getAttribute('request_id');
+        if ($id) {
+            $log->setId($id);
+        }
         return $log;
     }
 }

@@ -194,6 +194,11 @@ class Response extends Meta\Base
         $log->setExtra([
             'http_code' => $this->getHttpCode(),
         ]);
+
+        $id = $this->_request->getAttribute('request_id');
+        if ($id) {
+            $log->setId($id);
+        }
         return $log;
     }
 }

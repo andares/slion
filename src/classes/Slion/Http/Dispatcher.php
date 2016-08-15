@@ -121,7 +121,7 @@ class Dispatcher {
 
         // 错误记录与触发debugger handle
         if ($response instanceof ErrorResponse) {
-            dlog($response->confirm()->toLog());
+            lg($response->confirm()->toLog());
         }
         return $response;
     }
