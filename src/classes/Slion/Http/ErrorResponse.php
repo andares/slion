@@ -2,7 +2,10 @@
 namespace Slion\Http;
 
 use Slion\Debugger;
-use Slim\Http\Response as Raw;
+use Slim\Http\{
+    Response as Raw,
+    Request as RawRequest
+};
 
 /**
  *
@@ -44,8 +47,8 @@ class ErrorResponse extends Response {
      */
     protected $error_code = 0;
 
-    public function __construct(Raw $raw, \Throwable $e) {
-        parent::__construct($raw);
+    public function __construct(Raw $raw, RawRequest $request, \Throwable $e) {
+        parent::__construct($raw, $request);
         $this->e = $e;
         $this->by($e);
     }

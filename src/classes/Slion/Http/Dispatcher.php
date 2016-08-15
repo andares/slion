@@ -102,7 +102,7 @@ class Dispatcher {
             $response   = $controller->$action();
 
         } catch (Abort $abort) {
-            $response = $this->raiseError($raw_response, $abort());
+            $response = $this->raiseError($raw_response, $raw_request, $abort());
 
             // 触发hook
             $this->app->getContainer()->get('hook')
@@ -110,13 +110,13 @@ class Dispatcher {
 
         } catch (\BadMethodCallException $e) {
             // 处理未定义的接口
-            $response = $this->raiseError($raw_response,
+            $response = $this->raiseError($raw_response, $raw_request,
                 new \BadMethodCallException(
                     "action [$action@$controller_name] is not exists"));
             $response->setHttpCode(404);
 
         } catch (\Throwable $e) {
-            $response = $this->raiseError($raw_response, $e);
+            $response = $this->raiseError($raw_response, $raw_request, $e);
         }
 
         // 错误记录与触发debugger handle
@@ -161,8 +161,8 @@ class Dispatcher {
      * @param \Throwable $e
      * @return \Slion\Http\ErrorResponse
      */
-    protected function raiseError(RawResponse $raw, \Throwable $e): ErrorResponse {
-        $response = new ErrorResponse($raw, $e);
+    protected function raiseError(RawResponse $raw, RawRequest $request, \Throwable $e): ErrorResponse {
+        $response = new ErrorResponse($raw, $request, $e);
         return $response;
     }
 

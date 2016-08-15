@@ -1,7 +1,10 @@
 <?php
 namespace Slion\Http;
 
-use Slim\Http\Request as Raw;
+use Slim\Http\{
+    Response as RawResponse,
+    Request as Raw
+};
 use Slion\Meta;
 use Slion\Pack;
 use Slion\Utils\Logger\Log;
@@ -29,18 +32,18 @@ class Request extends Meta\Base
 
     /**
      *
-     * @var Controller
+     * @var RawResponse
      */
-    protected $_controller = null;
+    protected $_response = null;
 
     /**
      *
      * @param Raw $raw
-     * @param Controller $controller
+     * @param RawResponse $response
      */
-    public function __construct(Raw $raw, Controller $controller = null) {
+    public function __construct(Raw $raw, RawResponse $response = null) {
         $this->_raw         = $raw;
-        $this->_controller  = $controller;
+        $this->_response    = $response;
 
         $this->fill($raw->getParams());
         $this->takeUploadFiles();

@@ -2,7 +2,10 @@
 namespace Slion\Http;
 
 use Slion\Meta;
-use Slim\Http\Response as Raw;
+use Slim\Http\{
+    Response as Raw,
+    Request as RawRequest
+};
 use Slim\Collection;
 use Slion\Utils\Logger\Log;
 
@@ -44,18 +47,18 @@ class Response extends Meta\Base
 
     /**
      *
-     * @var Controller
+     * @var RawRequest
      */
-    protected $_controller = null;
+    protected $_request = null;
 
     /**
      *
      * @param Raw $raw
-     * @param Controller $controller
+     * @param RawRequest $request
      */
-    public function __construct(Raw $raw, Controller $controller = null) {
-        $this->_raw         = $raw;
-        $this->_controller  = $controller;
+    public function __construct(Raw $raw, RawRequest $request) {
+        $this->_raw     = $raw;
+        $this->_request = $request;
     }
 
     /**
