@@ -34,7 +34,7 @@ class Log {
     }
 
     public function __get(string $name) {
-        return $this->line[$name];
+        return $this->lines[$name];
     }
 
     public function setExtra(array $extra_info): self {
