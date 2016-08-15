@@ -96,10 +96,16 @@ if (!function_exists('ds')) {
     }
 }
 
-if (!function_exists('dlog')) {
-    function dlog($message, $priority = 'debug') {
+if (!function_exists('lg')) {
+    function lg($message, $priority = 'info') {
         $logger = Debugger::getLogger();
         $logger($message, $priority);
+    }
+}
+
+if (!function_exists('dlog')) {
+    function dlog($message, $priority = 'debug') {
+        log($message, $priority);
     }
 }
 

@@ -141,7 +141,7 @@ abstract class Controller {
         // 生成参数对象
         $receives = $this->getReceives($name);
 
-        dlog($receives[1]->confirm()->toLog());
+        lg($receives[1]->confirm()->toLog());
         $this->hook->take(\Slion\HOOK_BEFORE_ACTION, $this, $name,
             ...$receives, ...$arguments);
 
@@ -156,7 +156,7 @@ abstract class Controller {
         $response = $receives[0];
         $this->hook->take(\Slion\HOOK_BEFORE_RESPONSE, $response);
         $this->setCookieHeaders($response);
-        dlog($response->confirm()->toLog());
+        lg($response->confirm()->toLog());
         return $response;
     }
 
