@@ -17,12 +17,6 @@ class ErrorResponse extends Response {
     ];
 
     /**
-     * 错误词典名
-     * @var string
-     */
-    protected static $_message_dict = 'errors';
-
-    /**
      * @var int
      */
     protected $_http_code    = 200;
@@ -32,6 +26,12 @@ class ErrorResponse extends Response {
      * @var string
      */
     protected $_template = 'error.phtml';
+
+    /**
+     * 错误词典名
+     * @var string
+     */
+    protected static $message_dict = 'errors';
 
     /**
      *
@@ -86,7 +86,7 @@ class ErrorResponse extends Response {
      * @return string
      */
     protected function translateMessage($key): string {
-        return \tr(static::$_message_dict, $key);
+        return static::$message_dict ? \tr(static::$message_dict, $key) : "$key";
     }
 
     /**
