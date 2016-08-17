@@ -77,7 +77,7 @@ abstract class Controller {
      * @return string
      */
     protected function genPrefix(string $action): string {
-        return get_class($this) . '\\' . ucfirst($action);
+        return static::class . '\\' . ucfirst($action);
     }
 
     /**
