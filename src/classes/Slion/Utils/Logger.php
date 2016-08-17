@@ -144,7 +144,7 @@ class Logger extends TracyLogger {
             $e->getTraceAsString() . "\n\n+++++\n\n";
         $previous = $e->getPrevious();
         if ($previous) {
-            return $this->makeExceptionLogContent($content, $e);
+            return $this->makeExceptionLogContent($content, $previous);
         }
         return $content;
     }
