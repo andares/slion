@@ -235,9 +235,7 @@ class Run {
         spl_autoload_register(function ($classname) {
             try {
                 $file = \str_replace("\\", DIRECTORY_SEPARATOR, $classname) . ".php";
-                if (file_exists($file)) {
-                    include $file;
-                }
+                @include $file;
             } catch (\Throwable $exc) {
                 error_log($exc->getMessage());
                 error_log($exc->getCode());
