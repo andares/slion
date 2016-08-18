@@ -9,6 +9,12 @@ if (!function_exists('abort')) {
     }
 }
 
+if (!function_exists('mayday')) {
+    function mayday(\Throwable $e, callable $maker = null, ...$arguments): Slion\Abort {
+        return abort($e, $maker, ...$arguments);
+    }
+}
+
 if (!function_exists('path_for')) {
     function path_for(string $module, string $controller, string $action, array $queries = [], $ext = '') {
         global $app;
