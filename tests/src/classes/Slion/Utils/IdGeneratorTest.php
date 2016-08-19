@@ -43,7 +43,7 @@ class IdGeneratorTest extends \PHPUnit_Framework_TestCase {
         du($result);
 
         $result = Test::run(function() {
-        $this->object->algo = 'fnv164';
+            $this->object->algo = 'fnv164';
             return $this->object->prepare(microtime())->hash_hmac('acbde')
                 ->gmp_strval()->get();
         }, 1);

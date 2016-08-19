@@ -69,8 +69,9 @@ class IdGenerator {
         return $this;
     }
 
-    public function uuid() {
-        $this->data = str_replace('-', '', uuid_create());
+    public function uuid($trim = true) {
+        $id = uuid_create();
+        $this->data = $trim ? str_replace('-', '', $id) : $id;
         return $this;
     }
 }
