@@ -72,6 +72,12 @@ class Action {
      * @return \Slion\Http\Response
      */
     public function call(): Http\Response {
-        return $this->controller->{$this->action}();
+        $response = $this->controller->{$this->action}();
+        $this->restore();
+        return $response;
+    }
+
+    public function restore() {
+        $this->cookies([]);
     }
 }
