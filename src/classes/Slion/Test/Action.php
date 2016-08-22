@@ -35,6 +35,8 @@ class Action {
 
         $this->controller = $controller;
         $this->action     = $action;
+
+        $this->restore();
     }
 
     /**
@@ -73,11 +75,15 @@ class Action {
      */
     public function call(): Http\Response {
         $response = $this->controller->{$this->action}();
-        $this->restore();
         return $response;
     }
 
-    public function restore() {
+    /**
+     *
+     * @return self
+     */
+    public function restore(): self {
         $this->cookies([]);
+        return $this;
     }
 }
