@@ -147,9 +147,6 @@ class Run {
         $this->_container    = $this->_app->getContainer();
         $this->_settings     = $this->_container->get('slion_settings');
 
-        // 导入全局
-        $GLOBALS['app'] = $this->_app;
-
         // 注册自动载入
         $this->registerAutoload();
     }

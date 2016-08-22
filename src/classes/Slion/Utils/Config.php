@@ -11,6 +11,17 @@ class Config implements \ArrayAccess {
     private $scenes     = [];
     private $current    = '';
 
+    /**
+     *
+     * @param string $path
+     * @param array $data
+     * @return self
+     */
+    public function inject(string $path, array $data): self {
+        $this->data[$path] = $data;
+        return $this;
+    }
+
     public function __invoke(string $path) {
         return $this->select($path);
     }

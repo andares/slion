@@ -29,7 +29,7 @@ class RequestId implements Middleware {
 
     /**
      *
-     * @global \Slim\App $app
+     * @global \Slion\Run $run
      * @param Request $request
      * @param Response $response
      * @param \LionCommon\Http\Middleware\callable $next

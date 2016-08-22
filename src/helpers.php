@@ -17,8 +17,8 @@ if (!function_exists('mayday')) {
 
 if (!function_exists('path_for')) {
     function path_for(string $module, string $controller, string $action, array $queries = [], $ext = '') {
-        global $app;
-        return $app->getContainer()->get('router')->pathFor($module, [
+        global $run;
+        return $run->router->pathFor($module, [
             'controller'    => $controller,
             'action'        => $action,
             'ext'           => $ext
@@ -31,9 +31,8 @@ if (!function_exists('path_for')) {
  */
 if (!function_exists('tr')) {
     function tr($path, $key, ...$values) {
-        global $app;
-        /* @var $app \Slim\App */
-        $dict = $app->getContainer()->get('dict');
+        global $run;
+        $dict = $run->dict;
         /* @var $dict Slion\Utils\Dict */
         $dict($path);
 
@@ -46,9 +45,8 @@ if (!function_exists('tr')) {
 
 if (!function_exists('cf')) {
     function cf($path, $key = null) {
-        global $app;
-        /* @var $app \Slim\App */
-        $config = $app->getContainer()->get('config');
+        global $run;
+        $config = $run->config;
         /* @var $config Slion\Utils\Config */
         if ($key) {
             $config($path);
