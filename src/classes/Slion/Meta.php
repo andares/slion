@@ -10,9 +10,9 @@ abstract class Meta extends Meta\Base implements \ArrayAccess, \Serializable, \J
 
     /**
      * 构造器
-     * @param array $data
+     * @param array|Meta\Base $data
      */
-    public function __construct(array $data = null) {
+    public function __construct($data = null) {
         $data && $this->fill($data);
     }
 }
