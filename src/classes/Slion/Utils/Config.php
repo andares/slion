@@ -49,6 +49,7 @@ class Config implements \ArrayAccess {
                 }
             }
         }
+        return $list;
     }
 
     /**
