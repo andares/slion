@@ -30,16 +30,21 @@ class Config implements \ArrayAccess {
         $list = [];
         foreach ($this->scenes as $scene => $base_dirs) {
             foreach ($base_dirs as $base_dir => $default_scene) {
-                $dir = "$base_dir/$scene/$path";
-                if (file_exists($dir) && is_dir($dir)) {
-                    $it = new \RecursiveDirectoryIterator($dir);
-                    foreach ($it as $fileinfo) {
-                        /* @var $fileinfo \SplFileInfo */
-                        if ($fileinfo->isDir()) {
-                            continue;
-                        }
+                $dirs = [
+                    "$base_dir/$scene/$path",
+                    "$base_dir/$default_scene/$path",
+                ];
+                foreach ($dirs as $dir) {
+                    if (file_exists($dir) && is_dir($dir)) {
+                        $it = new \RecursiveDirectoryIterator($dir);
+                        foreach ($it as $fileinfo) {
+                            /* @var $fileinfo \SplFileInfo */
+                            if ($fileinfo->isDir()) {
+                                continue;
+                            }
 
-                        $list[] = $fileinfo->getBasename('.php');
+                            $list[] = $fileinfo->getBasename('.php');
+                        }
                     }
                 }
             }
