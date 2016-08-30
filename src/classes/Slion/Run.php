@@ -66,6 +66,11 @@ class Run {
         $GLOBALS['run'] = $this;
 
         $this->_id = $this->genId();
+
+        // 初始化imported
+        foreach (explode(PATH_SEPARATOR, ini_get('include_path')) as $dir) {
+            self::$_imported[$dir] = 1;
+        }
     }
 
     /**
@@ -93,7 +98,8 @@ class Run {
      * @return type
      */
     public function __get(string $name) {
-        return $this->_container->has($name) ? $this->_container->get($name) : null;
+        return $this->_container->has($name) ?
+            $this->_container->get($name) : null;
     }
 
     /**
@@ -231,8 +237,13 @@ class Run {
     private function registerAutoload() {
         spl_autoload_register(function ($classname) {
             try {
-                $file = \str_replace("\\", DIRECTORY_SEPARATOR, $classname) . ".php";
-                @include $file;
+                foreach (self::$_imported as $dir => $flag) {
+                    $file = $dir . DIRECTORY_SEPARATOR .
+                        \str_replace("\\", DIRECTORY_SEPARATOR, $classname) . ".php";
+                    if (file_exists($file)) {
+                        include $file;
+                    }
+                }
             } catch (\Throwable $exc) {
                 error_log($exc->getMessage());
                 error_log($exc->getCode());

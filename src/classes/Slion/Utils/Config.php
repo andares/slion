@@ -26,6 +26,26 @@ class Config implements \ArrayAccess {
         return $this->select($path);
     }
 
+    public function lists(string $path) {
+        $list = [];
+        foreach ($this->scenes as $scene => $base_dirs) {
+            foreach ($base_dirs as $base_dir => $default_scene) {
+                $dir = "$base_dir/$scene/$path";
+                if (file_exists($dir) && is_dir($dir)) {
+                    $it = new \RecursiveDirectoryIterator($dir);
+                    foreach ($it as $fileinfo) {
+                        /* @var $fileinfo \SplFileInfo */
+                        if ($fileinfo->isDir()) {
+                            continue;
+                        }
+
+                        $list[] = $fileinfo->getBasename('.php');
+                    }
+                }
+            }
+        }
+    }
+
     /**
      *
      * @param type $path
