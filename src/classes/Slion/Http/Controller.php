@@ -29,15 +29,24 @@ abstract class Controller {
 
     /**
      *
+     * 注意，$this->raw_request与从容器中取出的$this->request是不同的，后者未经过中件间的加工
+     *
      * @var RawRequest
      */
     protected $raw_request;
 
     /**
+     * 注意，$this->raw_response与从容器中取出的$this->response是不同的，后者未经过中件间的加工
      *
      * @var RawResponse
      */
     protected $raw_response;
+
+    /**
+     *
+     * @var array
+     */
+    protected $receives;
 
     /**
      *
@@ -131,6 +140,22 @@ abstract class Controller {
     }
 
     /**
+     * @todo 在升到php 7.1之前，任其为null报错
+     * @return \Slion\Http\Request
+     */
+    public function request(): Request {
+        return $this->receives[1] ?? null;
+    }
+
+    /**
+     * @todo 在升到php 7.1之前，任其为null报错
+     * @return \Slion\Http\Response
+     */
+    public function response(): Response {
+        return $this->receives[0] ?? null;
+    }
+
+    /**
      *
      * @param string $name
      * @param array $arguments
@@ -139,11 +164,11 @@ abstract class Controller {
      */
     public function __call(string $name, array $arguments): Response {
         // 生成参数对象
-        $receives = $this->getReceives($name);
+        $this->receives = $this->getReceives($name);
 
-        lg($receives[1]->confirm()->toLog());
+        lg($this->request()->confirm()->toLog());
         $this->hook->take(\Slion\HOOK_BEFORE_ACTION, $this, $name,
-            ...$receives, ...$arguments);
+            ...$this->receives, ...$arguments);
 
         // 执行业务
         $action = ucfirst($name);
@@ -151,9 +176,9 @@ abstract class Controller {
         if (!method_exists($this, $method)) {
             throw new \BadMethodCallException("action [$action] is not exist");
         }
-        $this->$method(...$receives, ...$arguments);
+        $this->$method(...$this->receives, ...$arguments);
 
-        $response = $receives[0];
+        $response = $this->response();
         $this->hook->take(\Slion\HOOK_BEFORE_RESPONSE, $response);
         $this->setCookieHeaders($response);
         lg($response->confirm()->toLog());
