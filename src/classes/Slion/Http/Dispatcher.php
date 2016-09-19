@@ -112,7 +112,7 @@ class Dispatcher {
             // 处理未定义的接口
             $response = $this->raiseError($raw_response, $raw_request,
                 new \BadMethodCallException(
-                    "action [$action@$controller_name] is not exists"));
+                    "action [$action@$controller_name] is not exists", 0, $e));
             $response->setHttpCode(404);
 
         } catch (\Throwable $e) {
@@ -137,7 +137,8 @@ class Dispatcher {
         RawRequest $raw_request, RawResponse $raw_response): Controller {
         $class = $this->getControllerClass($pattern, $name);
         if (!class_exists($class)) {
-            throw new \BadMethodCallException("controller [$name] is not exists");
+            throw new \BadMethodCallException(
+                "controller [$name] is not exists($class)");
         }
         $controller = new $class($this->app->getContainer(),
             $raw_request, $raw_response);
