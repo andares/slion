@@ -45,7 +45,7 @@ class Dispatcher {
             function (RawRequest $request, RawResponse $response, array $args)
             use ($pattern, $dispatcher) {
                 $response = $dispatcher($pattern, $args['controller'],
-                    $args['action'] ?? '',
+                    $args['action'] ?? 'index',
                     $request, $response);
                 /* @var $response Response */
 
@@ -73,7 +73,7 @@ class Dispatcher {
             function (RawRequest $request, RawResponse $response, array $args)
             use ($pattern, $dispatcher) {
                 $response = $dispatcher($pattern, $args['controller'],
-                    $args['action'] ?? '',
+                    $args['action'] ?? 'index',
                     $request, $response);
                 /* @var $response Response */
 
