@@ -32,6 +32,12 @@ class Request extends Meta\Base
 
     /**
      *
+     * @var array
+     */
+    protected $_raw_params = null;
+
+    /**
+     *
      * @var RawResponse
      */
     protected $_response = null;
@@ -119,5 +125,14 @@ class Request extends Meta\Base
             $log->setId($id);
         }
         return $log;
+    }
+
+    public function __get($name) {
+        $value = parent::__get($name);
+        if ($value === null) {
+            !$this->_raw_params && $this->_raw_params = $this->raw()->getParams();
+            return $this->_raw_params[$name] ?? null;
+        }
+        return $value;
     }
 }
