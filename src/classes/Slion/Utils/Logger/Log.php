@@ -66,9 +66,9 @@ class Log {
         $base['name'] = $this->name;
 
         $output = [
-            $base,
-            $this->body,
-            $this->extra,
+            'base'  => $base,
+            'body'  => $this->body,
+            'extra' => $this->extra,
         ];
         return $output;
     }
