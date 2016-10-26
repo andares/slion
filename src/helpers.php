@@ -103,7 +103,8 @@ if (!function_exists('ds')) {
 if (!function_exists('lg')) {
     function lg($message, $priority = 'info') {
         $logger = Debugger::getLogger();
-        return $logger && $logger($message, $priority);
+        return $logger && ($logger instanceof \Slion\Utils\Logger)
+            && $logger($message, $priority);
     }
 }
 
