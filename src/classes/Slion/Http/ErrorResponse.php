@@ -37,7 +37,7 @@ class ErrorResponse extends Response {
      *
      * @var \Throwable
      */
-    private $e;
+    protected $e;
 
     /**
      *
