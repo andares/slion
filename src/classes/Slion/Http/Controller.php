@@ -179,9 +179,9 @@ abstract class Controller {
         $this->$method(...$this->receives, ...$arguments);
 
         $response = $this->response();
-        $this->hook->take(\Slion\HOOK_BEFORE_RESPONSE, $response);
         $this->setCookieHeaders($response);
         lg($response->confirm()->toLog());
+        $this->hook->take(\Slion\HOOK_BEFORE_RESPONSE, $response);
         return $response;
     }
 
