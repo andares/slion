@@ -122,6 +122,7 @@ class Dispatcher {
         // 错误记录与触发debugger handle
         if ($response instanceof ErrorResponse) {
             lg($response->confirm()->toLog());
+            $this->hook->take(\Slion\HOOK_TAKE_ERRORRESPONSE, $response);
         }
         return $response;
     }

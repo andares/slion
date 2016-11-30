@@ -5,14 +5,16 @@ $hook = $container->get('hook');
 /* @var $hook \Slion\Hook */
 
 // add hook
-const HOOK_BEFORE_ACTION    = 'slion:before_action';
-const HOOK_ABORT_CATCHED    = 'slion:abort_catched';
-const HOOK_BEFORE_RESPONSE  = 'slion:before_response';
-const HOOK_REGRESS_RESPONSE = 'slion:regress_response';
+const HOOK_BEFORE_ACTION        = 'slion:before_action';
+const HOOK_ABORT_CATCHED        = 'slion:abort_catched';
+const HOOK_BEFORE_RESPONSE      = 'slion:before_response';
+const HOOK_TAKE_ERRORRESPONSE   = 'slion:take_error_response';
+const HOOK_REGRESS_RESPONSE     = 'slion:regress_response';
 
 $hook
     ->add(HOOK_BEFORE_ACTION)
     ->add(HOOK_BEFORE_RESPONSE)
+    ->add(HOOK_TAKE_ERRORRESPONSE)
     ->add(HOOK_ABORT_CATCHED)
     ->add(HOOK_REGRESS_RESPONSE);
 
