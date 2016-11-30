@@ -57,7 +57,7 @@ class Log {
         return $this;
     }
 
-    protected function makeOutput() {
+    public function makeOutput() {
         global $run;
         /* @var $run \Slion\Run */
         $id = $this->id ? $this->id : $run->getId();
