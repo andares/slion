@@ -70,8 +70,12 @@ class Request extends Meta\Base
     public function confirm(): self {
         // 解包打包的参数
         foreach (static::$_packed as $name) {
-            is_string($this->$name) &&
-                $this->$name = Pack::decode(static::$_pack_format, $this->$name);
+            if (!is_string($this->$name)) {
+                $this->$name = [];
+                continue;
+            }
+
+            $this->$name = Pack::decode(static::$_pack_format, $this->$name) ?: [];
         }
 
         return parent::confirm();
