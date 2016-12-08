@@ -75,7 +75,8 @@ class Request extends Meta\Base
                 continue;
             }
 
-            $this->$name = Pack::decode(static::$_pack_format, $this->$name) ?: [];
+            $unpacked = Pack::decode(static::$_pack_format, $this->$name);
+            $this->$name = $unpacked && is_array($unpacked) ? $unpacked : [];
         }
 
         return parent::confirm();
