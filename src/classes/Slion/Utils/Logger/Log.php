@@ -74,6 +74,12 @@ class Log {
     }
 
     public function __toString() {
-        return Pack::encode('json', $this->makeOutput());
+        $str = Pack::encode('json', $this->makeOutput());
+        if (!is_string($str)) {
+            dlog('Log object serialize fail');
+            dlog(var_export($this->makeOutput(), true));
+            throw new \RuntimeException('Log object serialize fail');
+        }
+        return $str;
     }
 }
