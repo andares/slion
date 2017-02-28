@@ -76,7 +76,7 @@ class Logger extends TracyLogger {
         $line = [@date('[Y-m-d H:i:s]')];
 
         if ($message instanceof Logger\Log) {
-            $ip_forward = $run->request->getHeader('HTTP_X_FORWARD_FOR')[0] ?? '';
+            $ip_forward = $run->request->getHeader('HTTP_X_FORWARDED_FOR')[0] ?? '';
             $message->setExtra([
                 'ip'            => $run->environment->get('REMOTE_ADDR'),
                 'ip_forward'    => $ip_forward,
