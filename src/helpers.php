@@ -26,9 +26,17 @@ if (!function_exists('path_for')) {
     }
 }
 
-function _get_path(): string {
+function _get_source(): string {
     $source = \Tracy\Helpers::getSource();
     if (preg_match('/^http[s]?:\/\/[^\/]*\/(.*)/', $source, $result)) {
+        return $result[1] ?? $source;
+    }
+    return '';
+}
+
+function _get_path(): string {
+    $source = \Tracy\Helpers::getSource();
+    if (preg_match('/^http[s]?:\/\/[^\/]*\/([^\?]*)/', $source, $result)) {
         return $result[1] ?? $source;
     }
     return '';
