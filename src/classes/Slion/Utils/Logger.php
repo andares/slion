@@ -80,7 +80,8 @@ class Logger extends TracyLogger {
             $message->setExtra([
                 'ip'            => $run->environment->get('REMOTE_ADDR'),
                 'ip_forward'    => $ip_forward,
-                'source'        => _get_source(),
+                'source'        => \Tracy\Helpers::getSource(),
+                'path'          => _get_path(),
             ]);
             $line[] = "$message";
         } else {
