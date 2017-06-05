@@ -16,6 +16,37 @@ class Logger extends TracyLogger {
      */
     public $enableBlueScreen = false;
 
+    public $log_to_file = true;
+
+	public function log($message, $priority = self::INFO)
+	{
+		if (!$this->directory) {
+			throw new \LogicException('Directory is not specified.');
+		} elseif (!is_dir($this->directory)) {
+			throw new \RuntimeException("Directory '$this->directory' is not found or is not directory.");
+		}
+
+		$exceptionFile = $message instanceof \Exception || $message instanceof \Throwable
+			? $this->getExceptionFile($message)
+			: NULL;
+		$line = $this->formatLogLine($message, $exceptionFile);
+		$file = $this->directory . '/' . strtolower($priority ?: self::INFO) . '.log';
+
+		if ($this->log_to_file &&!@file_put_contents($file, $line . PHP_EOL, FILE_APPEND | LOCK_EX)) { // @ is escalated to exception
+			throw new \RuntimeException("Unable to write to log file '$file'. Is directory writable?");
+		}
+
+		if ($exceptionFile) {
+			$this->logException($message, $exceptionFile);
+		}
+
+		if (in_array($priority, [self::ERROR, self::EXCEPTION, self::CRITICAL], TRUE)) {
+			$this->sendEmail($message);
+		}
+
+		return $exceptionFile;
+	}
+
     /**
      *
      * @param string $directory

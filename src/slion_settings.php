@@ -9,7 +9,7 @@ return [
 //        ],
     ],
     'config'    => [
-        'scene'     => 'dev',
+        'scene'     => 'master',
         'default'   => 'default', // 默认scene
     ],
     'logger'    => [

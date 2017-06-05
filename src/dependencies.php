@@ -5,7 +5,7 @@ namespace Slion;
 // 配置
 $container['config'] = function(\Slim\Container $c) use ($root) {
     $config = new Utils\Config();
-    $config->addScene('master', "$root/config", 'dev');
+    $config->addScene('master', "$root/config");
     return $config;
 };
 
